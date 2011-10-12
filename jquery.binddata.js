@@ -14,7 +14,6 @@
 	TokenStream.prototype.currentContext = 'html';
 	
 	TokenStream.prototype.read = function() {
-		this.lineIdx = 1;
 		var str = this.str;
 		this.currentContext = 'html';
 		var token = '';
@@ -28,13 +27,13 @@
 				this.invalidChar( next );
 			}
 			this.currentContext = 'output';
-			++this.idx;
+			this.idx += 2;
 		} else if ( chr == '{' ) {
 			if ( (next = this.nextChar()) !== '{' ) {
 				this.invalidChar( next );
 			}
 			this.currentContext = 'stmt';
-			++this.idx;
+			this.idx += 2;
 		} else { // handling HTML context in a different loop for faster execution
 			for (; this.idx < this.inputStrLen; ++this.idx) {
 				chr = str[this.idx];
@@ -46,7 +45,6 @@
 					case '$':
 					case '{':
 						if ( (next = this.nextChar()) === '{' ) {
-							--this.idx;
 							return {
 								type: this.currentContext,
 								token: token
