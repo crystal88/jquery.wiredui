@@ -252,14 +252,15 @@
 				throw "missing closing bracket in expression '" + expr + "'";
 			}
 			var simpleExpr = trim( expr.substr(1, expr.length - 2) );
-			return Expression.buildSimpleExpr( simpleExpr );
+			return Expression.buildExprFn( simpleExpr );
 		}
 		return Expression.buildSimpleExpr( trim(expr) );
 	}
 	
 	Expression.buildSimpleExpr = function( expr ) {
 		var builders = [Expression.buildLiteralExpr
-			, Expression.buildVariableExpr];
+			, Expression.buildVariableExpr
+			, Expression.buildOperatorExpr];
 		for ( var i = 0; i < builders.length; ++i ) {
 			var candidate = builders[ i ] ( expr );
 			if (candidate !== null )
@@ -342,9 +343,8 @@
 		}
 	}
 	
-	
 	Expression.buildVariableExpr = function( expr ) {
-		if ( ! /[a-zA-Z_][a-zA-Z0-9_]*(\s*\.\s*[a-zA-Z_][a-zA-Z0-9_]*)*/.test(expr) )
+		if ( ! /^[a-zA-Z_][a-zA-Z0-9_]*(\s*\.\s*[a-zA-Z_][a-zA-Z0-9_]*)*$/.test(expr) )
 			return null;
 		
 		var propChain = expr.split('.');
@@ -356,6 +356,8 @@
 			fn: function(data) {
 				var currObj = data;
 				for ( var i = 0; i < propChain.length; ++i ) {
+					if ( ! $.isFunction( currObj ) )
+						throw "failed to evaluate expression: '" + expr + "'";
 					var candidate = currObj() [ propChain[ i ] ];
 					if (candidate === undefined)
 						return undefined;
@@ -366,6 +368,41 @@
 			dependencies: [propChain]
 		};
 	}
+
+	Expression.buildOperatorExpr = function( expr ) {
+		var builders = [Expression.buildUnaryOperatorExpr, Expression.buildBinaryOperatorExpr];
+		for ( var i = 0; i < builders.length; ++i ) {
+			var candidate = builders[i] ( expr );
+			if ( candidate !== null ) {
+				return candidate;
+			}
+		}
+		return null;
+	};
+	
+	Expression.buildUnaryOperatorExpr = function( expr ) {
+		var operandExpr = null;
+		if ( expr.charAt(0) == '!' ) {
+			operandExpr = expr.substr(1);
+		} else if (expr.substr(0, 4) == 'not ') {
+			operandExpr = trim(expr.substr(4));
+		}
+		if (null === operandExpr)
+			return null;
+			
+		var operand = new Expression( operandExpr );
+		
+		return  {
+			fn: function(data) {
+				return ! operand.evaluate( data );
+			},
+			dependencies: operand.dependencies
+		};
+	};
+	
+	Expression.buildBinaryOperatorExpr = function( expr ) {
+		throw "binary operators not implemented";
+	};
 	
 	Expression.prototype.fn = null;
 	

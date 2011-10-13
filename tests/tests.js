@@ -132,3 +132,14 @@ test("variables", function() {
 	expr = new $.binddata.Expression("non.exis.tent");
 	same(undefined, expr.evaluate(data), "handling non-existent property correctly");
 })
+
+test("unary operators", function() {
+	var expr = new $.binddata.Expression("! false");
+	same(true, expr.evaluate({}), "! works");
+	
+	var expr = new $.binddata.Expression("not ((false))");
+	same(true, expr.evaluate({}), "'not' works");
+	
+	var expr = new $.binddata.Expression("not ! true");
+	same(true, expr.evaluate({}), "'not not' works");
+});
