@@ -126,14 +126,14 @@
 		
 	};
 	
-	NodeController.factory = function(tokenObj, tokenstream, scopeData) {
+	NodeController.factory = function(tokenObj, tokenstream) {
 		switch( tokenObj.type ) {
 			case 'html':
 				return new HTMLNodeController( tokenObj, tokenstream );
 			case 'output':
-				return new OutputNodeController( tokenObj, tokenstream, scopeData );
+				return new OutputNodeController( tokenObj, tokenstream );
 			case 'stmt':
-				return StatementNodeController.factory( tokenObj, tokenstream, scopeData );
+				return StatementNodeController.factory( tokenObj, tokenstream );
 			default:
 				throw "unknown token type: " + tokekObj.type;
 		}
@@ -147,7 +147,7 @@
 	
 	HTMLNodeController.prototype.block = null;
 	
-	var OutputNodeController = function( tokenObj, tokenstream, scopeData ) {
+	var OutputNodeController = function( tokenObj, tokenstream ) {
 		this.expression = new Expression(tokenObj);
 		
 	};
@@ -158,43 +158,43 @@
 	
 	StatementNodeController.prototype.block = [];
 	
-	StatementNodeController.factory = function( tokenObj, tokenstream, scopeData ) {
+	StatementNodeController.factory = function( tokenObj, tokenstream ) {
 		var str = tokenObj.token;
 		var firstSpacePos = str.indexOf(" ");
 		var stmtWord = str.substr(0, firstSpacePos);
 		var remaining = str.substr(firstSpacePos);
 		switch( stmtWord ) {
 			case 'if':
-				return new IfStatementNodeController( remaining, tokenstream, scopeData );
+				return new IfStatementNodeController( remaining, tokenstream );
 			case 'elseif':
 			case 'elif':
 			case 'elsif':
-				return new ElseIfStatementNodeController( remaining, tokenstream, scopeData );
+				return new ElseIfStatementNodeController( remaining, tokenstream );
 			case 'else':
-				return new ElseStatementNodeController( remaining, tokenstream, scopeData );
+				return new ElseStatementNodeController( remaining, tokenstream );
 			case 'each':
-				return new EachStatementNodeController( remaining, tokenstream, scopeData );
+				return new EachStatementNodeController( remaining, tokenstream );
 		}
 	}
 	
 	StatementNodeController.prototype = new NodeController();
 	
-	var IfStatementNodeController = function( condition, tokenstream, scopeData ) {
+	var IfStatementNodeController = function( condition, tokenstream ) {
 		
 	}
 	
 	IfStatementNodeController.prototype = new StatementNodeController();
 	
-	var ElseIfStatementNodeController = function( condition, tokenstream, scopeData ) {
+	var ElseIfStatementNodeController = function( condition, tokenstream ) {
 		
 	}
 	
 	ElseIfStatementNodeController.prototype = new StatementNodeController();
 	
-	var ElseStatementNodeController = function( remaining, tokenstream, scopeData ) {
+	var ElseStatementNodeController = function( remaining, tokenstream ) {
 		if (remaining)
 			tokenstream.raiseError("unexpected '" + remaining + "'");
-		this.block = readTree(tokenstream, scopeData, {type: 'stmt', token: '/if'}
+		this.block = readTree(tokenstream, {type: 'stmt', token: '/if'}
 			, [{type: 'stmt', token: '/each'}]);
 	}
 	
@@ -236,8 +236,8 @@
 		readTree(new TokenStream(this[0].innerHTML), data);
 	}
 	
-	var Expression = function( expr, scopeData ) {
-		var compiledExpr = Expression.buildExprFn( trim(expr), scopeData );
+	var Expression = function( expr ) {
+		var compiledExpr = Expression.buildExprFn( trim(expr) );
 		if ( compiledExpr === null )
 			throw "failed to compile expression '" + expr + "'";
 		this.fn = compiledExpr.fn;
@@ -246,22 +246,22 @@
 		}
 	};
 	
-	Expression.buildExprFn = function( expr, scopeData ) {
+	Expression.buildExprFn = function( expr ) {
 		if (expr.charAt(0) == '(') {
 			if (expr.charAt(expr.length - 1) !== ')') {
 				throw "missing closing bracket in expression '" + expr + "'";
 			}
 			var simpleExpr = trim( expr.substr(1, expr.length - 2) );
-			return Expression.buildSimpleExpr( simpleExpr, scopeData );
+			return Expression.buildSimpleExpr( simpleExpr );
 		}
-		return Expression.buildSimpleExpr( trim(expr), scopeData );
+		return Expression.buildSimpleExpr( trim(expr) );
 	}
 	
-	Expression.buildSimpleExpr = function( expr, scopeData ) {
+	Expression.buildSimpleExpr = function( expr ) {
 		var builders = [Expression.buildLiteralExpr
 			, Expression.buildVariableExpr];
 		for ( var i = 0; i < builders.length; ++i ) {
-			var candidate = builders[ i ] ( expr, scopeData );
+			var candidate = builders[ i ] ( expr );
 			if (candidate !== null )
 				return candidate;
 		}
@@ -343,15 +343,28 @@
 	}
 	
 	
-	Expression.buildVariableExpr = function( expr, scopeData ) {
-		if ( $.isFunction(scopeData()[expr] ) ) {
-			return {
-				fn: function(data) {
-					return data()[expr]();
-				}
-			};
+	Expression.buildVariableExpr = function( expr ) {
+		if ( ! /[a-zA-Z_][a-zA-Z0-9_]*(\s*\.\s*[a-zA-Z_][a-zA-Z0-9_]*)*/.test(expr) )
+			return null;
+		
+		var propChain = expr.split('.');
+		for ( var i = 0; i < propChain.length; ++i ) {
+			propChain[ i ] = trim(propChain[ i ]);
 		}
-		return null;
+		
+		return {
+			fn: function(data) {
+				var currObj = data;
+				for ( var i = 0; i < propChain.length; ++i ) {
+					var candidate = currObj() [ propChain[ i ] ];
+					if (candidate === undefined)
+						return undefined;
+					currObj = candidate;
+				}
+				return currObj;
+			},
+			dependencies: [propChain]
+		};
 	}
 	
 	Expression.prototype.fn = null;

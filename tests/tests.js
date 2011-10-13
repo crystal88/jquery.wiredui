@@ -116,8 +116,19 @@ test("literals", function() {
 
 test("variables", function() {
 	var data = $.observable({myvar: 'myval'});
-	var expr = new $.binddata.Expression("myvar", data);
+	var expr = new $.binddata.Expression("myvar");
 	
 	data().myvar("changed");
-	same('changed', expr.evaluate(data), "simple variable")
+	same('changed', expr.evaluate(data)(), "simple variable")
+	
+	data = $.observable({
+		myobj: {
+			mystr: "hey"
+		}
+	});
+	expr = new $.binddata.Expression("myobj.mystr");
+	same('hey', expr.evaluate(data)(), "object property");
+	
+	expr = new $.binddata.Expression("non.exis.tent");
+	same(undefined, expr.evaluate(data), "handling non-existent property correctly");
 })
