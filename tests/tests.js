@@ -113,3 +113,11 @@ test("literals", function() {
 	expr = new $.binddata.Expression("false");
 	same(false, expr.evaluate(), "boolean false works");
 })
+
+test("variables", function() {
+	var data = $.observable({myvar: 'myval'});
+	var expr = new $.binddata.Expression("myvar", data);
+	
+	data().myvar("changed");
+	same('changed', expr.evaluate(data), "simple variable")
+})

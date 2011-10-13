@@ -237,28 +237,35 @@
 	}
 	
 	var Expression = function( expr, scopeData ) {
-		this.fn = Expression.buildExprFn( trim(expr) );
+		var compiledExpr = Expression.buildExprFn( trim(expr), scopeData );
+		if ( compiledExpr === null )
+			throw "failed to compile expression '" + expr + "'";
+		this.fn = compiledExpr.fn;
+		if ( compiledExpr.dependencies ) { // literal expressions will never have dependencies
+			this.dependencies = compiledExpr.dependencies;
+		}
 	};
 	
-	Expression.buildExprFn = function( expr ) {
+	Expression.buildExprFn = function( expr, scopeData ) {
 		if (expr.charAt(0) == '(') {
 			if (expr.charAt(expr.length - 1) !== ')') {
 				throw "missing closing bracket in expression '" + expr + "'";
 			}
-			var simpleExpr = trim( expr.substr(1, expr.length - 1) );
-			return Expression.buildSimpleExpr( simpleExpr );
+			var simpleExpr = trim( expr.substr(1, expr.length - 2) );
+			return Expression.buildSimpleExpr( simpleExpr, scopeData );
 		}
-		return Expression.buildSimpleExpr( trim(expr) );
+		return Expression.buildSimpleExpr( trim(expr), scopeData );
 	}
 	
-	Expression.buildSimpleExpr = function( expr ) {
-		var literalExpr = Expression.buildLiteralExpr( expr );
-		if (literalExpr !== null)
-			return literalExpr;
-		
-		return function() {
-			return null;
+	Expression.buildSimpleExpr = function( expr, scopeData ) {
+		var builders = [Expression.buildLiteralExpr
+			, Expression.buildVariableExpr];
+		for ( var i = 0; i < builders.length; ++i ) {
+			var candidate = builders[ i ] ( expr, scopeData );
+			if (candidate !== null )
+				return candidate;
 		}
+		return null;
 	};
 	
 	Expression.buildLiteralExpr = function( expr ) {
@@ -269,7 +276,9 @@
 		for ( var i = 0; i < literalBuilders.length; ++i ) {
 			var candidate = literalBuilders[i] ( expr );
 			if (candidate !== null)
-				return candidate;
+				return {
+					fn: candidate,
+				};
 		}
 		return null;
 	}
@@ -333,10 +342,22 @@
 		}
 	}
 	
+	
+	Expression.buildVariableExpr = function( expr, scopeData ) {
+		if ( $.isFunction(scopeData()[expr] ) ) {
+			return {
+				fn: function(data) {
+					return data()[expr]();
+				}
+			};
+		}
+		return null;
+	}
+	
 	Expression.prototype.fn = null;
 	
-	Expression.prototype.evaluate = function() {
-		return this.fn();
+	Expression.prototype.evaluate = function(data) {
+		return this.fn(data);
 	};
 	
 	Expression.prototype.dependencies = [];
