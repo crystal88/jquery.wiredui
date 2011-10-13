@@ -8,7 +8,7 @@ opExpr ::= unaryOpExpr | binaryOpExpr
 unaryOpExpr ::= unaryOp expr
 unaryOp ::= '!' | 'not'
 binaryOpExpr ::= expr binaryOp expr
-binaryOp ::= '=' | '==' | '<' | '>' | '<=' | '>=' | 'or' | 'and' | '||' | '&&'
+binaryOp ::= '=' | '==' | '<' | '>' | '<=' | '>=' | 'or' | 'and' | '||' | '&&' || '+' || '*' || '/' || '%'
 
 statementFragment ::= '{{' statement '}}'
 statement ::= if | elseif | else | each | assignment | endif | endeach

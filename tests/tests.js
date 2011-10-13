@@ -7,6 +7,10 @@ function tokens(str) {
 	return stream.readAll();
 }
 
+test("trim test", function() {
+	same(new String(" a ").replace(/\s+$/, '').replace(/^\s+/, ''), "a")
+})
+
 module("TokenStream");
 
 test("Reading plain HTML", function(){
@@ -73,7 +77,7 @@ test("Statement token reading", function() {
 		token: ' hey'
 	}], "stmt > html");
 	
-	a = tokens("hooray {{foo < bar.user}} hey{{aa}}");
+	a = tokens("hooray {{foo < bar.user}} hey{{ aa }}");
 	same(a, [{
 		type: 'html',
 		token: 'hooray '
@@ -88,3 +92,24 @@ test("Statement token reading", function() {
 		token: 'aa'
 	}], "html > stmt > html > stmt");
 });
+
+
+module("Expressions");
+
+test("literals", function() {
+	var expr = new $.binddata.Expression(" (null ) ");
+	same(null, expr.evaluate(), "null works");
+	expr = new $.binddata.Expression(" 'hey'");
+	same('hey', expr.evaluate(), "''string works");
+	expr = new $.binddata.Expression(' "hey" ');
+	same('hey', expr.evaluate(), '"" string works');
+	
+	expr = new $.binddata.Expression("-2.45");
+	same(-2.45, expr.evaluate(), "number works");
+	
+	expr = new $.binddata.Expression("true");
+	same(true, expr.evaluate(), "boolean true works");
+	
+	expr = new $.binddata.Expression("false");
+	same(false, expr.evaluate(), "boolean false works");
+})
