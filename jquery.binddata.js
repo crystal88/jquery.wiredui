@@ -256,12 +256,13 @@
 	Expression.buildExprFn = function( expr ) {
 		if (expr.charAt(0) == '(') {
 			if (expr.charAt(expr.length - 1) !== ')') {
+				return Expression.buildSimpleExpr(expr)
 				throw "missing closing bracket in expression '" + expr + "'";
 			}
 			var simpleExpr = trim( expr.substr(1, expr.length - 2) );
 			return Expression.buildExprFn( simpleExpr );
 		}
-		return Expression.buildSimpleExpr( trim(expr) );
+		return Expression.buildSimpleExpr(expr);
 	}
 	
 	Expression.buildSimpleExpr = function( expr ) {
@@ -453,8 +454,10 @@
 				escaped = ! escaped;
 				continue;
 			}
-			if ( openBracketCount > 0 )
+			if ( openBracketCount > 0 ) {
+				currentOperand += chr;
 				continue;
+			}
 			var foundOperator = null;
 			for (var j = 0; j < Expression.binaryOperators.length; ++j ) {
 				var operator = Expression.binaryOperators[j];
@@ -469,6 +472,7 @@
 				}
 				if ( foundOperator !== null ) {
 					foundOperator = operator;
+					i += foundOperator.length - 1;
 					break;
 				}
 			}
@@ -494,6 +498,7 @@
 			debug('--------------------------')
 			debug('opsUnderResolv: ' + opsUnderResolv)
 			debug('operator: ' + operators); debug('operands: ' + operands)
+			var operatorMatchFound = false;
 			for (var operatorIdx = 0
 					; operatorIdx < operators.length
 					; ++operatorIdx) {
@@ -543,6 +548,8 @@
 					));
 						
 					})(leftOperand, operator, rightOperand);
+					
+					
 					
 					//continue;
 				} else {
@@ -674,7 +681,7 @@
 		['*', '/', '%'],
 		['+', '-'],
 		['<=', '>=', '<', '>'],
-		['==', '=']
+		['==', '='],
 		['and', '&&'],
 		['or', '||']
 	];

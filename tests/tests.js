@@ -147,7 +147,7 @@ test("unary operators", function() {
 function testBinExpr(expr, data, result) {
 	var xpr = new $.binddata.Expression(expr);
 	data = $.observable(data);
-	same(result, xpr.evaluate(data), expr);
+	same(xpr.evaluate(data), result, expr);
 }
 
 test("binary expressions", function() {
@@ -156,9 +156,13 @@ test("binary expressions", function() {
 		b: 4
 	};
 	testBinExpr("a + b", data, 9);
-	
 	testBinExpr("a * b", data, 20);
-	testBinExpr("2 + 2", data, 4)
-	testBinExpr("a + 2 * b", data, 13)
+	testBinExpr("2 + 2", data, 4);
+	testBinExpr("a + 2 * b", data, 13);
+	testBinExpr("b * (a + 2)", data, 28);
+	testBinExpr("(a + 2) * b", data, 28);
+	testBinExpr("'a' + 'b'", data, 'ab');
+	testBinExpr("true and false", data, false);
+	testBinExpr("1 + 2 + 3", data, 6);
 	
 });
