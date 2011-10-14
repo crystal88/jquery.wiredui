@@ -25,7 +25,7 @@
 		if ( this.idx >= this.inputStrLen )
 			return null;
 			
-		var chr = str[this.idx];
+		var chr = str.charAt( this.idx );
 		if ( chr == '$' ) {
 			if ( (next = this.nextChar()) !== '{' ) {
 				this.invalidChar( next );
@@ -40,7 +40,7 @@
 			this.idx += 2;
 		} else { // handling HTML context in a different loop for faster execution
 			for (; this.idx < this.inputStrLen; ++this.idx) {
-				chr = str[this.idx];
+				chr = str.charAt( this.idx );
 			
 				switch( chr ) {
 					case "\n":
@@ -236,7 +236,14 @@
 		readTree(new TokenStream(this[0].innerHTML), data);
 	}
 	
-	var Expression = function( expr ) {
+	var Expression = function( expr, dependencies ) {
+		if ( $.isFunction( expr ) ) {
+			if (undefined === dependencies)
+				throw "dpendencies must be an array";
+			this.fn = expr;
+			this.dependencies = dependencies;
+			return;
+		}
 		var compiledExpr = Expression.buildExprFn( trim(expr) );
 		if ( compiledExpr === null )
 			throw "failed to compile expression '" + expr + "'";
@@ -401,8 +408,276 @@
 	};
 	
 	Expression.buildBinaryOperatorExpr = function( expr ) {
-		throw "binary operators not implemented";
+		var openBracketCount = 0;
+		var stringCloseChr = null;
+		var escaped = false;
+		var currentOperand = '';
+		var operands = [];
+		var operators = [];
+		for ( var i = 0; i < expr.length; ++i ) {
+			
+			var chr = expr.charAt(i);
+			
+			if (chr == '(' && stringCloseChr === null) {
+				++openBracketCount;
+				currentOperand += chr;
+				continue;
+			}
+			if (chr === ')' && stringCloseChr === null) {
+				--openBracketCount;
+				currentOperand += chr;
+				continue;
+			}
+			if ( (chr === '"' || chr === "'") ) {
+				currentOperand += chr;
+				if ( stringCloseChr !== null ) { // we are in a string
+					if ( chr === stringCloseChr ) {
+						if ( escaped ) {
+							escaped = false;
+						} else {
+							stringCloseChr = null;
+						}
+						continue;
+					} else {
+						escaped = false;
+						continue;
+					}
+				} else {
+					escaped = false;
+					stringCloseChr = chr;
+					continue;
+				}
+			}
+			if ( chr == '\\' ) {
+				currentOperand += chr;
+				escaped = ! escaped;
+				continue;
+			}
+			if ( openBracketCount > 0 )
+				continue;
+			var foundOperator = null;
+			for (var j = 0; j < Expression.binaryOperators.length; ++j ) {
+				var operator = Expression.binaryOperators[j];
+				//debug('candidate: ' + operator)
+				foundOperator = operator;
+				for ( var opCharIdx = 0; opCharIdx < operator.length; ++opCharIdx ) {
+					if (expr.length > (i + opCharIdx) 
+							&& expr.charAt(i + opCharIdx) == operator.charAt(opCharIdx) ) {
+						continue;
+					}
+					foundOperator = null;
+				}
+				if ( foundOperator !== null ) {
+					foundOperator = operator;
+					break;
+				}
+			}
+			
+			if (foundOperator === null) {
+				currentOperand += chr;
+			} else {
+				operands.push( currentOperand );
+				operators.push( foundOperator );
+				currentOperand = '';
+			}
+		}
+		if (currentOperand !== '') {
+			operands.push(currentOperand);
+		}
+		if (operands.length != operators.length + 1)
+			throw "failed to compile expression '" + expr + "'";
+			
+		for ( i = 0; i < Expression.operatorPrecedence.length; ++i ) {
+			var nextOperators = [];
+			var nextOperands = [];
+			var opsUnderResolv = Expression.operatorPrecedence[i];
+			debug('--------------------------')
+			debug('opsUnderResolv: ' + opsUnderResolv)
+			debug('operator: ' + operators); debug('operands: ' + operands)
+			for (var operatorIdx = 0
+					; operatorIdx < operators.length
+					; ++operatorIdx) {
+				var operator = operators[operatorIdx];
+				var found = false;
+				for (var j = 0; j < opsUnderResolv.length; ++j) {
+					if ( opsUnderResolv[j] == operator ) {
+						found = true; break;
+					}
+				}
+				if (found) { // the operator should be processed
+					debug("creating evaluator for " + operator )
+					// debug(operands[operatorIdx]);
+					// debug(operands[operatorIdx + 1]);
+					
+					var leftOperand = operands[operatorIdx];
+					if ( ! $.isFunction(leftOperand.evaluate) ) {
+						leftOperand = new Expression(leftOperand);
+					}
+					/*debug(leftOperand.evaluate( $.observable(
+						{'a': 'a'}
+					) )()); */
+					var rightOperand = operands[operatorIdx + 1];
+					if ( ! $.isFunction(rightOperand.evaluate) ) {
+						debug(rightOperand + '  ' + operator);
+						rightOperand = new Expression(rightOperand);
+					}
+					var evalRightOp = rightOperand.evaluate( $.observable(
+						{'b': 'b'}
+					) );
+					while($.isFunction(evalRightOp)) {
+						evalRightOp = evalRightOp();
+					}
+					debug('evaluated right op: ' + evalRightOp);
+					
+					
+					
+					(function(leftOperand, operator, rightOperand) {
+						
+						nextOperands.push(new Expression(
+						function( data ) {
+							debug('eval ' + operator)
+							return Expression.binaryOpExecutors[operator]
+								(leftOperand.evaluate(data), rightOperand.evaluate(data) )
+						},
+						[] // TODO
+					));
+						
+					})(leftOperand, operator, rightOperand);
+					
+					//continue;
+				} else {
+					debug('nextOps.push ' + operator);
+					nextOperators.push( operator );
+					nextOperands.push( operands[operatorIdx] );
+				}
+			}
+			debug('next')
+			nextOperands.push( operands[operands.length - 1])
+			debug(nextOperators); debug(nextOperands)
+			operators = nextOperators;
+			operands = nextOperands;
+			if (operators.length == 0) {
+				break;
+			}
+			//break;
+		}
+		debug(operands[0])
+		return operands[0];
 	};
+	
+	// keep the operators ordered descending by length
+	Expression.binaryOperators = ['==', '=', '<=', '>=', '<', '>', 'or', 'and', '||', '&&', '+', '*', '/', '%'];
+	
+	Expression.binaryOpExecutors = {
+		'==': function() {
+			while ( $.isFunction(a) ) {
+				a = a();
+			};
+			while ($.isFunction(b) ) {
+				b = b();
+			}
+			return a == b;
+		},
+		'=': function() {
+			while ( $.isFunction(a) ) {
+				a = a();
+			};
+			while ($.isFunction(b) ) {
+				b = b();
+			}
+			return a == b;
+		},
+		'<=': function(a, b) {
+			while ( $.isFunction(a) ) {
+				a = a();
+			};
+			while ($.isFunction(b) ) {
+				b = b();
+			}
+			return a <= b;
+		},
+		'+': function(a, b) {
+			while ( $.isFunction(a) ) {
+				a = a();
+			};
+			while ($.isFunction(b) ) {
+				b = b();
+			}
+			return a + b;
+		},
+		'-': function(a, b) {
+			while ( $.isFunction(a) ) {
+				a = a();
+			};
+			while ($.isFunction(b) ) {
+				b = b();
+			}
+			return a - b;
+		},
+		'*': function(a, b) {
+			while ( $.isFunction(a) ) {
+				a = a();
+			};
+			while ($.isFunction(b) ) {
+				b = b();
+			}
+			return a * b;
+		},
+		'/': function(a, b) {
+			while ( $.isFunction(a) ) {
+				a = a();
+			};
+			while ($.isFunction(b) ) {
+				b = b();
+			}
+			return a / b;
+		},
+		'and': function(a, b) {
+			while ( $.isFunction(a) ) {
+				a = a();
+			};
+			while ($.isFunction(b) ) {
+				b = b();
+			}
+			return a && b;
+		},
+		'&&': function(a, b) {
+			while ( $.isFunction(a) ) {
+				a = a();
+			};
+			while ($.isFunction(b) ) {
+				b = b();
+			}
+			return a && b;
+		},
+		'or': function(a, b) {
+			while ( $.isFunction(a) ) {
+				a = a();
+			};
+			while ($.isFunction(b) ) {
+				b = b();
+			}
+			return a || b;
+		},
+		'||': function(a, b) {
+			while ( $.isFunction(a) ) {
+				a = a();
+			};
+			while ($.isFunction(b) ) {
+				b = b();
+			}
+			return a || b;
+		}
+	};
+	
+	Expression.operatorPrecedence = [
+		['*', '/', '%'],
+		['+', '-'],
+		['<=', '>=', '<', '>'],
+		['==', '=']
+		['and', '&&'],
+		['or', '||']
+	];
 	
 	Expression.prototype.fn = null;
 	

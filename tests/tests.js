@@ -143,3 +143,22 @@ test("unary operators", function() {
 	var expr = new $.binddata.Expression("not ! true");
 	same(true, expr.evaluate({}), "'not not' works");
 });
+
+function testBinExpr(expr, data, result) {
+	var xpr = new $.binddata.Expression(expr);
+	data = $.observable(data);
+	same(result, xpr.evaluate(data), expr);
+}
+
+test("binary expressions", function() {
+	var data = {
+		a: 5,
+		b: 4
+	};
+	testBinExpr("a + b", data, 9);
+	
+	testBinExpr("a * b", data, 20);
+	testBinExpr("2 + 2", data, 4)
+	testBinExpr("a + 2 * b", data, 13)
+	
+});
