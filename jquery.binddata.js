@@ -492,12 +492,7 @@
 			throw "failed to compile expression '" + expr + "'";
 			
 		for ( i = 0; i < Expression.operatorPrecedence.length; ++i ) {
-			var nextOperators = [];
-			var nextOperands = [];
 			var opsUnderResolv = Expression.operatorPrecedence[i];
-			debug('--------------------------')
-			debug('opsUnderResolv: ' + opsUnderResolv)
-			debug('operator: ' + operators); debug('operands: ' + operands)
 			var operatorMatchFound = false;
 			for (var operatorIdx = 0
 					; operatorIdx < operators.length
@@ -510,65 +505,38 @@
 					}
 				}
 				if (found) { // the operator should be processed
-					debug("creating evaluator for " + operator )
-					// debug(operands[operatorIdx]);
-					// debug(operands[operatorIdx + 1]);
 					
 					var leftOperand = operands[operatorIdx];
 					if ( ! $.isFunction(leftOperand.evaluate) ) {
 						leftOperand = new Expression(leftOperand);
 					}
-					/*debug(leftOperand.evaluate( $.observable(
-						{'a': 'a'}
-					) )()); */
+					
 					var rightOperand = operands[operatorIdx + 1];
 					if ( ! $.isFunction(rightOperand.evaluate) ) {
-						debug(rightOperand + '  ' + operator);
 						rightOperand = new Expression(rightOperand);
 					}
-					var evalRightOp = rightOperand.evaluate( $.observable(
-						{'b': 'b'}
-					) );
-					while($.isFunction(evalRightOp)) {
-						evalRightOp = evalRightOp();
-					}
-					debug('evaluated right op: ' + evalRightOp);
 					
-					
+					operators.splice(operatorIdx, (operatorIdx == 0 ? 1 : operatorIdx)); // no comment
+					operands.splice(operatorIdx + 1, operatorIdx + 1);
 					
 					(function(leftOperand, operator, rightOperand) {
 						
-						nextOperands.push(new Expression(
+						operands[operatorIdx] = new Expression(
 						function( data ) {
-							debug('eval ' + operator)
-							return Expression.binaryOpExecutors[operator]
-								(leftOperand.evaluate(data), rightOperand.evaluate(data) )
-						},
-						[] // TODO
-					));
+								return Expression.binaryOpExecutors[operator]
+									(leftOperand.evaluate(data), rightOperand.evaluate(data) )
+							},
+							[] // TODO
+						);
 						
 					})(leftOperand, operator, rightOperand);
-					
-					
-					
-					//continue;
-				} else {
-					debug('nextOps.push ' + operator);
-					nextOperators.push( operator );
-					nextOperands.push( operands[operatorIdx] );
+					--operatorIdx;
 				}
 			}
-			debug('next')
-			nextOperands.push( operands[operands.length - 1])
-			debug(nextOperators); debug(nextOperands)
-			operators = nextOperators;
-			operands = nextOperands;
 			if (operators.length == 0) {
 				break;
 			}
-			//break;
 		}
-		debug(operands[0])
 		return operands[0];
 	};
 	

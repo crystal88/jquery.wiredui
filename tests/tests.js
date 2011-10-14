@@ -150,7 +150,10 @@ function testBinExpr(expr, data, result) {
 	same(xpr.evaluate(data), result, expr);
 }
 
+
 test("binary expressions", function() {
+	//var arr = ['a', 'b', 'c'];
+	//debug(arr.splice(2, 2));// return;
 	var data = {
 		a: 5,
 		b: 4
@@ -164,5 +167,8 @@ test("binary expressions", function() {
 	testBinExpr("'a' + 'b'", data, 'ab');
 	testBinExpr("true and false", data, false);
 	testBinExpr("1 + 2 + 3", data, 6);
-	
+	testBinExpr("a.aa * 2", {
+		a: {aa: function() {return 2}}
+	}, 4);
+	testBinExpr("not false and not false", data, true);
 });
