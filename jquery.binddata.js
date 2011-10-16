@@ -122,11 +122,20 @@
 		throw message + " at line " + this.lineIdx;
 	}
 	
+	var UniqId = new (function() {
+		var last = 0;
+		
+		this.next = function() {
+			return ++last;
+		};
+	});
+	
 	var NodeController = function() {
 		
 	};
 	
 	NodeController.factory = function(tokenObj, tokenstream) {
+		//debug("creating controller for " + tokenObj.token + ' (' + tokenObj.type + ')');
 		switch( tokenObj.type ) {
 			case 'html':
 				return new HTMLNodeController( tokenObj, tokenstream );
@@ -139,6 +148,35 @@
 		}
 	};
 	
+	NodeController.prototype.render = function( data ) {
+		throw "not implemented";
+	};
+	
+	NodeController.prototype.init = function( data ) {
+		var uniqid = UniqId.next();
+		var containerSelector = this.containerSelector = 'jquery-binddata-' + uniqid;
+		var html = '<' + containerSelector + '>';
+		html += this.render( data );
+		html += '</' + containerSelector + '>';
+		
+		var self = this;
+		for (var i = 0; i < this.dependencies.length; ++i) {
+				var d = data;
+				var propchain = this.dependencies[ i ];
+				
+				for (var j = 0; j < propchain.length; ++j) {
+					debug("step: " + propchain[ j ] );
+					d = d() [propchain[ j ]];
+				}
+				d.on('change', function() {
+					$(containerSelector).html(self.render( data ));
+				});
+		}
+		return html;
+	}
+	
+	NodeController.prototype.dependencies = [];
+	
 	var HTMLNodeController = function( tokenObj, tokenstream ) {
 		this.block = [ tokenObj.token ];
 	};
@@ -147,12 +185,31 @@
 	
 	HTMLNodeController.prototype.block = null;
 	
+	
+	HTMLNodeController.prototype.init = function( data ) {
+		return this.block[ 0 ];
+	}
+	
+	HTMLNodeController.prototype.render = function() {
+		// nothing to do here - the init() method did the job
+	}
+	
 	var OutputNodeController = function( tokenObj, tokenstream ) {
-		this.expression = new Expression(tokenObj);
-		
+		this.expression = new Expression(tokenObj.token);
+		this.dependencies = this.expression.dependencies;
+		debug('deps'); debug(this.dependencies);
 	};
 	
 	OutputNodeController.prototype = new NodeController();
+	
+	OutputNodeController.prototype.render = function( data ) {
+		debug("rendering");
+		var val = this.expression.evaluate( data );
+		while ( $.isFunction( val ) ) {
+			val = val();
+		}
+		return val;
+	};
 	
 	var StatementNodeController = function() {};
 	
@@ -174,19 +231,24 @@
 				return new ElseStatementNodeController( remaining, tokenstream );
 			case 'each':
 				return new EachStatementNodeController( remaining, tokenstream );
+			
 		}
 	}
 	
 	StatementNodeController.prototype = new NodeController();
 	
 	var IfStatementNodeController = function( condition, tokenstream ) {
-		
+		this.condition = new Expression( condition );
+		this.block = readTree(tokenstream, {}, [{type: 'stmt', token: '/if'}
+			, {type: 'stmt', token: 'else'}]);
 	}
 	
 	IfStatementNodeController.prototype = new StatementNodeController();
 	
 	var ElseIfStatementNodeController = function( condition, tokenstream ) {
-		
+		this.condition = new Expression( condition );
+		this.block = readTree(tokenstream, {}, [{type: 'stmt', token: '/if'}
+			, {type: 'stmt', token: 'else'}]);
 	}
 	
 	ElseIfStatementNodeController.prototype = new StatementNodeController();
@@ -208,32 +270,39 @@
 		}
 		var token;
 		var rval = [];
-		if ( ! disabledTokens ) {
-			while ( (token = tokenstream.read()) !== null ) { // no disabled tokens, simple reading
-				if (token === readUntil)
+		
+		while ( (token = tokenstream.read()) !== null ) { // no disabled tokens, simple reading
+			//debug("reading token " + token.token + " (" + token.type + ")")
+			if ( $.isArray( readUntil ) ) {
+				var found = false;
+				for ( var i = 0; i < readUntil.length; ++i ) {
+					if (token.type == readUntil[ i ].type && token.token == readUntil[ i ].token )
+						found = true;
+				}
+				if ( found ) {
 					break;
-				rval.push( NodeController.factory(token, tokenstream, data) );
-			}
-		} else {
-			if ( ! $.isArray(disabledTokens) )
-				throw "disabledTokens must be an array or null";
-			
-			while ( (token = tokenstream.read()) !== null ) { // no disabled tokens, simple reading
-				if (token === readUntil)
-					break;
+				}
+			} else if (readUntil && token.type == readUntil.type && token.token == readUntil.token)
+				break;
+			if ( $.isArray( disabledTokens ) ) {
 				for (var i = 0; i < disabledTokens.length; ++i ) {
 					if (disabledToken[ i ] == token) {
 						tokenstream.raiseError("unexpected " + token);
 					}
 				}
-				rval.push( NodeController.factory(token, tokenstream, data) );
 			}
+			rval.push( NodeController.factory(token, tokenstream, data) );
 		}
 		return rval;
 	}
 	
 	$.fn.binddata = function(data) {
-		readTree(new TokenStream(this[0].innerHTML), data);
+		var nodes = readTree(new TokenStream(this[0].innerHTML), data);
+		var html = '';
+		for (var i = 0; i < nodes.length; ++i) {
+			html += nodes[i] . init( data );
+		};
+		$(this[ 0 ]).html( html );
 	}
 	
 	var Expression = function( expr, dependencies ) {
@@ -607,6 +676,15 @@
 			}
 			return a / b;
 		},
+		'%': function(a, b) {
+			while ( $.isFunction(a) ) {
+				a = a();
+			};
+			while ($.isFunction(b) ) {
+				b = b();
+			}
+			return a % b;
+		},
 		'and': function(a, b) {
 			while ( $.isFunction(a) ) {
 				a = a();
@@ -667,7 +745,8 @@
 	 */
 	$.binddata = {
 		TokenStream: TokenStream,
-		Expression: Expression
+		Expression: Expression,
+		readTree: readTree
 	};
 	
 })(jQuery);

@@ -152,8 +152,6 @@ function testBinExpr(expr, data, result) {
 
 
 test("binary expressions", function() {
-	//var arr = ['a', 'b', 'c'];
-	//debug(arr.splice(2, 2));// return;
 	var data = {
 		a: 5,
 		b: 4
@@ -172,3 +170,26 @@ test("binary expressions", function() {
 	}, 4);
 	testBinExpr("not false and not false", data, true);
 });
+
+test("output tag test", function() {
+	var data = $.observable({
+		name: 'bence',
+		email: 'crystal@cyclonephp.com'
+	})
+	$('#outputtest').binddata( data );
+	
+	
+	
+	data().name('crystalxxx');
+	setTimeout(function() {data().name('heeey'); debug('omg')}, 800)
+})
+/*
+test("if statement", function() {
+	$("#iftest").binddata( $.observable({
+		name: "bence"
+	}));
+	debug($.binddata.readTree( new $.binddata.TokenStream("hello <b>{{if name == 'foo'}} foo ${name} {{/if}}</b>"), {
+		name: 'me'
+	}));
+});
+*/
