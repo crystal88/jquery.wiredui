@@ -171,25 +171,40 @@ test("binary expressions", function() {
 	testBinExpr("not false and not false", data, true);
 });
 
+module("statement tags");
+//*
 test("output tag test", function() {
 	var data = $.observable({
 		name: 'bence',
 		email: 'crystal@cyclonephp.com'
 	})
 	$('#outputtest').binddata( data );
+	same($('#outputtest .name :first').html(), 'bence', "initial name");
+	same($('#outputtest .email :first').html(), 'crystal@cyclonephp.com', "initial email");
+	data().name('crystal');
 	
-	
-	
-	data().name('crystalxxx');
-	setTimeout(function() {data().name('heeey'); debug('omg')}, 800)
+	same($('#outputtest .name :first').html(), 'crystal', "value change handled properly");
 })
-/*
+
 test("if statement", function() {
-	$("#iftest").binddata( $.observable({
-		name: "bence"
-	}));
-	debug($.binddata.readTree( new $.binddata.TokenStream("hello <b>{{if name == 'foo'}} foo ${name} {{/if}}</b>"), {
-		name: 'me'
-	}));
+	var data = $.observable({
+		name: "bence",
+		render: true
+	});
+	$("#iftest").binddata( data );
+
+
+	data().name('crystal');
+	data().render(false);
 });
-*/
+
+/**/
+test("if-elseif-else tags", function() {
+	var data = $.observable({
+		name: "bence",
+		email: "crystal@cyclonephp.com",
+		render: 'name'
+	});
+	$("#ifelseiftest").binddata( data );
+});
+/**/

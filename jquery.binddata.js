@@ -149,27 +149,61 @@
 	};
 	
 	NodeController.prototype.render = function( data ) {
-		throw "not implemented";
+		throw "not implemented ";
 	};
 	
-	NodeController.prototype.init = function( data ) {
+	NodeController.prototype.minifyDependencies = function() {
+		if (this.block) {
+			var thisDeps = this.dependencies;
+			for ( var i = 0; i < this.block.length; ++i ) {
+				var node = this.block[i];
+				var nodeNewDeps = [];
+				for ( var j = 0; j < node.dependencies; ++j ) {
+					var nodeDep = node.dependencies[ j ];
+					var foundInThis = false;
+					for ( var d = 0; d < thisDeps.length; ++d ) {
+						var thisDep = thisDeps[ d ];
+						if (thisDep.length > nodeDep.length) {
+							nodeNewDeps.push(nodeDep);
+							continue;
+						}
+						for (var p = 0; p = thisDep.length; ++d) {
+							if (thisDep[ p ] != nodeDep[ p ]) {
+								nodeNewDeps.push( nodeDep );
+							}
+						}
+					}
+				}
+				node.dependencies = nodeNewDeps;
+			}
+		}
+	}
+	
+	NodeController.prototype.init = function( data, rootContext ) {
 		var uniqid = UniqId.next();
 		var containerSelector = this.containerSelector = 'jquery-binddata-' + uniqid;
 		var html = '<' + containerSelector + '>';
-		html += this.render( data );
+		html += this.render( data, 'init' );
 		html += '</' + containerSelector + '>';
+		
+		if (this.block) {
+			for (var i = 0; i < this.block.length; ++i) {
+				this.block[ i ].init( data, rootContext );
+			}
+		}
+		
+		this.minifyDependencies();
 		
 		var self = this;
 		for (var i = 0; i < this.dependencies.length; ++i) {
 				var d = data;
 				var propchain = this.dependencies[ i ];
-				
 				for (var j = 0; j < propchain.length; ++j) {
-					debug("step: " + propchain[ j ] );
 					d = d() [propchain[ j ]];
 				}
+				//debug(propchain);
 				d.on('change', function() {
-					$(containerSelector).html(self.render( data ));
+					$(rootContext).find(containerSelector).html(self.render( data, 'render' ));
 				});
 		}
 		return html;
@@ -178,7 +212,8 @@
 	NodeController.prototype.dependencies = [];
 	
 	var HTMLNodeController = function( tokenObj, tokenstream ) {
-		this.block = [ tokenObj.token ];
+		this.block = [];
+		this.rawHTML = tokenObj.token ;
 	};
 	
 	HTMLNodeController.prototype = new NodeController();
@@ -187,23 +222,21 @@
 	
 	
 	HTMLNodeController.prototype.init = function( data ) {
-		return this.block[ 0 ];
+		return this.rawHTML;
 	}
 	
 	HTMLNodeController.prototype.render = function() {
-		// nothing to do here - the init() method did the job
+		return this.rawHTML;
 	}
 	
 	var OutputNodeController = function( tokenObj, tokenstream ) {
 		this.expression = new Expression(tokenObj.token);
 		this.dependencies = this.expression.dependencies;
-		debug('deps'); debug(this.dependencies);
 	};
 	
 	OutputNodeController.prototype = new NodeController();
 	
 	OutputNodeController.prototype.render = function( data ) {
-		debug("rendering");
 		var val = this.expression.evaluate( data );
 		while ( $.isFunction( val ) ) {
 			val = val();
@@ -218,8 +251,13 @@
 	StatementNodeController.factory = function( tokenObj, tokenstream ) {
 		var str = tokenObj.token;
 		var firstSpacePos = str.indexOf(" ");
-		var stmtWord = str.substr(0, firstSpacePos);
-		var remaining = str.substr(firstSpacePos);
+		if (firstSpacePos == -1) {
+			var stmtWord = str;
+			var remaining = "";
+		} else {
+			var stmtWord = str.substr(0, firstSpacePos);
+			var remaining = str.substr(firstSpacePos);
+		}
 		switch( stmtWord ) {
 			case 'if':
 				return new IfStatementNodeController( remaining, tokenstream );
@@ -231,27 +269,93 @@
 				return new ElseStatementNodeController( remaining, tokenstream );
 			case 'each':
 				return new EachStatementNodeController( remaining, tokenstream );
-			
 		}
+		throw "invalid statement tag " + tokenObj.token;
 	}
 	
 	StatementNodeController.prototype = new NodeController();
 	
 	var IfStatementNodeController = function( condition, tokenstream ) {
 		this.condition = new Expression( condition );
-		this.block = readTree(tokenstream, {}, [{type: 'stmt', token: '/if'}
-			, {type: 'stmt', token: 'else'}]);
+		this.dependencies = this.condition.dependencies;
+		this.block = readTree(tokenstream, {}, [{type: 'stmt', token: '/if'}]);
+		
+		var elseIfNodesPassed = false;
+		for (var i = 0; i < this.block.length; ++i) {
+			var node = this.block[ i ];
+			if (node instanceof ElseIfStatementNodeController) {
+				elseIfNodesPassed = true;
+				this.elseIfStatements.push( node );
+			} else {
+				if (elseIfNodesPassed) {
+					this.elseBlock.push( node );
+				} else {
+					this.onTrueBlock.push( node );
+				}
+			};
+		}
 	}
 	
 	IfStatementNodeController.prototype = new StatementNodeController();
 	
+	IfStatementNodeController.prototype.onTrueBlock = [];
+	
+	IfStatementNodeController.prototype.elseIfStatements = [];
+	
+	IfStatementNodeController.prototype.elseBlock = [];
+	
+	IfStatementNodeController.prototype.render = function(data, blockRenderer) {
+		if ( ! blockRenderer) {
+			blockRenderer = 'init';
+		}
+		var html = '';
+		var condition = this.condition.evaluate( data );
+		while ( $.isFunction(condition) ) {
+			condition = condition();
+		}
+		debug(this.block);
+		if (condition) {
+			for (var i = 0; i < this.onTrueBlock.length; ++i) {
+				html += this.onTrueBlock[i][blockRenderer]( data, blockRenderer );
+			}
+		} else {
+			var found = false;
+			for (var i = 0; i < this.elseIfStatements.length; ++i) {
+				var elseIf = this.elseIfStatements[ i ];
+				condition = elseIf.condition.evaluate( data );
+				while ( $.isFunction(condition) ) {
+					condition = condition();
+				}
+				if (condition) {
+					found = true;
+					html += elseIf [blockRenderer] (data, blockRenderer);
+					break;
+				}
+			}
+			if ( ! found ) { // no matching elseif found, running else block
+				for (var i = 0; i < this.elseBlock.length; ++i) {
+					html += this.elseBlock[i] [ blockRenderer ] (data, blockRenderer);
+				}
+			}
+		}
+		return html;
+	};
+	
 	var ElseIfStatementNodeController = function( condition, tokenstream ) {
 		this.condition = new Expression( condition );
+		this.dependencies = this.condition.dependencies;
 		this.block = readTree(tokenstream, {}, [{type: 'stmt', token: '/if'}
 			, {type: 'stmt', token: 'else'}]);
 	}
 	
 	ElseIfStatementNodeController.prototype = new StatementNodeController();
+	
+	ElseIfStatementNodeController.prototype.render = function(data, blockRenderer) {
+		if ( ! blockRenderer) {
+			blockRenderer = 'init';
+		}
+		
+	}
 	
 	var ElseStatementNodeController = function( remaining, tokenstream ) {
 		if (remaining)
@@ -297,12 +401,19 @@
 	}
 	
 	$.fn.binddata = function(data) {
-		var nodes = readTree(new TokenStream(this[0].innerHTML), data);
-		var html = '';
-		for (var i = 0; i < nodes.length; ++i) {
-			html += nodes[i] . init( data );
-		};
-		$(this[ 0 ]).html( html );
+		
+		this.each(function() {
+			var nodes = readTree(new TokenStream(this.innerHTML), data);
+			var html = '';
+			for (var i = 0; i < nodes.length; ++i) {
+				//debug('node rendering');
+				//debug(nodes[ i ]);
+				html += nodes[i] . init( data, this );
+			};
+			$(this).html( html );
+		});
+		
+		return this;
 	}
 	
 	var Expression = function( expr, dependencies ) {
@@ -613,7 +724,7 @@
 	Expression.binaryOperators = ['==', '=', '<=', '>=', '<', '>', 'or', 'and', '||', '&&', '+', '*', '/', '%'];
 	
 	Expression.binaryOpExecutors = {
-		'==': function() {
+		'==': function(a, b) {
 			while ( $.isFunction(a) ) {
 				a = a();
 			};
@@ -622,7 +733,7 @@
 			}
 			return a == b;
 		},
-		'=': function() {
+		'=': function(a, b) {
 			while ( $.isFunction(a) ) {
 				a = a();
 			};

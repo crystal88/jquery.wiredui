@@ -20,7 +20,23 @@
 		<div id="test-templates">
 		
 			<div id="outputtest">
-				<b> ${name} </b>
+				<span class="name">${name}</span>
+				<span class="email">${email}</span>
+			</div>
+			
+			<div id="iftest">
+				<i>{{if render}} <u> ${name} </u> {{/if}}</i>
+			</div>
+
+			<div id="ifelseiftest">
+				{{ if render == 'name'}}
+					<b>${name}</b>
+				{{ elseif render == 'email'}}
+					<b>${email}</b>
+				{{ else }}
+					<u>nothing to render</u>
+				{{/if}}
+				
 			</div>
 		
 		</div>
