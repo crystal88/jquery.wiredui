@@ -135,7 +135,6 @@
 	};
 	
 	NodeController.factory = function(tokenObj, tokenstream) {
-		//debug("creating controller for " + tokenObj.token + ' (' + tokenObj.type + ')');
 		switch( tokenObj.type ) {
 			case 'html':
 				return new HTMLNodeController( tokenObj, tokenstream );
@@ -191,9 +190,9 @@
 				this.block[ i ].init( data, rootContext );
 			}
 		}
-		
+
 		this.minifyDependencies();
-		
+		debug("root ctx: " + rootContext);
 		var self = this;
 		for (var i = 0; i < this.dependencies.length; ++i) {
 				var d = data;
@@ -201,9 +200,11 @@
 				for (var j = 0; j < propchain.length; ++j) {
 					d = d() [propchain[ j ]];
 				}
-				//debug(propchain);
+				//(propchain);
 				d.on('change', function() {
-					$(rootContext).find(containerSelector).html(self.render( data, 'render' ));
+					debug(propchain + " changed, rendering into " + containerSelector  + " :: " + self.render( data, 'render' ))
+					debug('root context: ' + (typeof rootContext))
+					debug("selected: " + $(containerSelector).html(self.render( data, 'render' )).length);
 				});
 		}
 		return html;
@@ -232,12 +233,14 @@
 	var OutputNodeController = function( tokenObj, tokenstream ) {
 		this.expression = new Expression(tokenObj.token);
 		this.dependencies = this.expression.dependencies;
+		debug("OutputNode deps"); debug(this.dependencies)
 	};
 	
 	OutputNodeController.prototype = new NodeController();
 	
 	OutputNodeController.prototype.render = function( data ) {
 		var val = this.expression.evaluate( data );
+		debug("rendering outputnode"); debug($.observable.remove(data))
 		while ( $.isFunction( val ) ) {
 			val = val();
 		}
@@ -313,7 +316,7 @@
 		while ( $.isFunction(condition) ) {
 			condition = condition();
 		}
-		debug(this.block);
+		//debug(this.block);
 		if (condition) {
 			for (var i = 0; i < this.onTrueBlock.length; ++i) {
 				html += this.onTrueBlock[i][blockRenderer]( data, blockRenderer );
@@ -354,7 +357,11 @@
 		if ( ! blockRenderer) {
 			blockRenderer = 'init';
 		}
-		
+		var html = '';
+		for (var i = 0; i < this.block.length; ++i) {
+			html += this.block[ i ] [ blockRenderer ] (data, blockRenderer);
+		}
+		return html;
 	}
 	
 	var ElseStatementNodeController = function( remaining, tokenstream ) {
@@ -375,8 +382,7 @@
 		var token;
 		var rval = [];
 		
-		while ( (token = tokenstream.read()) !== null ) { // no disabled tokens, simple reading
-			//debug("reading token " + token.token + " (" + token.type + ")")
+		while ( (token = tokenstream.read()) !== null ) {
 			if ( $.isArray( readUntil ) ) {
 				var found = false;
 				for ( var i = 0; i < readUntil.length; ++i ) {
@@ -406,8 +412,6 @@
 			var nodes = readTree(new TokenStream(this.innerHTML), data);
 			var html = '';
 			for (var i = 0; i < nodes.length; ++i) {
-				//debug('node rendering');
-				//debug(nodes[ i ]);
 				html += nodes[i] . init( data, this );
 			};
 			$(this).html( html );
@@ -641,7 +645,6 @@
 			var foundOperator = null;
 			for (var j = 0; j < Expression.binaryOperators.length; ++j ) {
 				var operator = Expression.binaryOperators[j];
-				//debug('candidate: ' + operator)
 				foundOperator = operator;
 				for ( var opCharIdx = 0; opCharIdx < operator.length; ++opCharIdx ) {
 					if (expr.length > (i + opCharIdx) 
@@ -706,7 +709,7 @@
 								return Expression.binaryOpExecutors[operator]
 									(leftOperand.evaluate(data), rightOperand.evaluate(data) )
 							},
-							[] // TODO
+							leftOperand.dependencies.concat(rightOperand.dependencies)
 						);
 						
 					})(leftOperand, operator, rightOperand);

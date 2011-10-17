@@ -172,7 +172,7 @@ test("binary expressions", function() {
 });
 
 module("statement tags");
-//*
+/*
 test("output tag test", function() {
 	var data = $.observable({
 		name: 'bence',
@@ -206,5 +206,9 @@ test("if-elseif-else tags", function() {
 		render: 'name'
 	});
 	$("#ifelseiftest").binddata( data );
+	same( $("#ifelseiftest .name :first").html(), 'bence');
+	data().name("crystal");
+	//same( $("#ifelseiftest .name :first").html(), 'crystal');
+	//data().render('email');
 });
 /**/
