@@ -18,16 +18,18 @@
 		<ol id="qunit-tests"></ol>
 		
 		<div id="test-templates">
-		
+			<h2>outputtest</h2>
 			<div id="outputtest">
 				<span class="name">${name}</span>
 				<span class="email">${email}</span>
 			</div>
 			
+			<h2>iftest</h2>
 			<div id="iftest">
-				<i>{{if render}} <u id="uif"> ${name} </u> {{/if}}</i>
+				{{if not hide}} <u id="uif">${name}</u> {{/if}}
 			</div>
 
+			<h2>ifelseiftest</h2>
 			<div id="ifelseiftest">
 				{{ if render == 'name'}}
 					<span class="name">${name}</span>

@@ -126,7 +126,8 @@
 		var last = 0;
 		
 		this.next = function() {
-			return ++last;
+			var rval = ++last;
+			return rval;
 		};
 	});
 	
@@ -147,7 +148,7 @@
 		}
 	};
 	
-	NodeController.prototype.render = function( data ) {
+	NodeController.prototype.update = function( data, rootContext ) {
 		throw "not implemented ";
 	};
 	
@@ -179,20 +180,20 @@
 	}
 	
 	NodeController.prototype.init = function( data, rootContext ) {
-		var uniqid = UniqId.next();
-		var containerSelector = this.containerSelector = 'jquery-binddata-' + uniqid;
-		var html = '<' + containerSelector + '>';
-		html += this.render( data, 'init' );
-		html += '</' + containerSelector + '>';
-		
-		if (this.block) {
-			for (var i = 0; i < this.block.length; ++i) {
-				this.block[ i ].init( data, rootContext );
+		var html = '';
+		if ( ! this.containerSelector || $(rootContext).find(this.containerSelector).length == 0) {
+			if ( ! this.containerSelector ) {
+				this.containerSelector = 'jquery-binddata-' + UniqId.next();
 			}
+			var containerSelector = this.containerSelector;
+			html += '<' + containerSelector + '>';
+			html += this.update( data, rootContext );
+			html += '</' + containerSelector + '>';
+		} else {
+			html = this.update( data );
 		}
-
+		
 		this.minifyDependencies();
-		debug("root ctx: " + rootContext);
 		var self = this;
 		for (var i = 0; i < this.dependencies.length; ++i) {
 				var d = data;
@@ -200,11 +201,9 @@
 				for (var j = 0; j < propchain.length; ++j) {
 					d = d() [propchain[ j ]];
 				}
-				//(propchain);
 				d.on('change', function() {
-					debug(propchain + " changed, rendering into " + containerSelector  + " :: " + self.render( data, 'render' ))
-					debug('root context: ' + (typeof rootContext))
-					debug("selected: " + $(containerSelector).html(self.render( data, 'render' )).length);
+					debug(propchain + " changed, rendering into " + self.containerSelector  + " :: " + self.update( data ))
+					'selected length: ' + $(rootContext).find(self.containerSelector).html(self.update( data, rootContext ));
 				});
 		}
 		return html;
@@ -226,21 +225,19 @@
 		return this.rawHTML;
 	}
 	
-	HTMLNodeController.prototype.render = function() {
+	HTMLNodeController.prototype.update = function() {
 		return this.rawHTML;
 	}
 	
 	var OutputNodeController = function( tokenObj, tokenstream ) {
 		this.expression = new Expression(tokenObj.token);
 		this.dependencies = this.expression.dependencies;
-		debug("OutputNode deps"); debug(this.dependencies)
 	};
 	
 	OutputNodeController.prototype = new NodeController();
 	
-	OutputNodeController.prototype.render = function( data ) {
+	OutputNodeController.prototype.update = function( data, rootContext ) {
 		var val = this.expression.evaluate( data );
-		debug("rendering outputnode"); debug($.observable.remove(data))
 		while ( $.isFunction( val ) ) {
 			val = val();
 		}
@@ -279,10 +276,14 @@
 	StatementNodeController.prototype = new NodeController();
 	
 	var IfStatementNodeController = function( condition, tokenstream ) {
+		debug("created if stmt for condition " + condition);
 		this.condition = new Expression( condition );
 		this.dependencies = this.condition.dependencies;
+		debug(this.dependencies);
 		this.block = readTree(tokenstream, {}, [{type: 'stmt', token: '/if'}]);
-		
+		this.onTrueBlock = [];
+		this.elseIfStatements = [];
+		this.elseBlock = [];
 		var elseIfNodesPassed = false;
 		for (var i = 0; i < this.block.length; ++i) {
 			var node = this.block[ i ];
@@ -307,19 +308,15 @@
 	
 	IfStatementNodeController.prototype.elseBlock = [];
 	
-	IfStatementNodeController.prototype.render = function(data, blockRenderer) {
-		if ( ! blockRenderer) {
-			blockRenderer = 'init';
-		}
+	IfStatementNodeController.prototype.update = function(data, rootContext ) {
 		var html = '';
 		var condition = this.condition.evaluate( data );
 		while ( $.isFunction(condition) ) {
 			condition = condition();
 		}
-		//debug(this.block);
 		if (condition) {
 			for (var i = 0; i < this.onTrueBlock.length; ++i) {
-				html += this.onTrueBlock[i][blockRenderer]( data, blockRenderer );
+				html += this.onTrueBlock[i].init( data, rootContext );
 			}
 		} else {
 			var found = false;
@@ -331,13 +328,16 @@
 				}
 				if (condition) {
 					found = true;
-					html += elseIf [blockRenderer] (data, blockRenderer);
+					var elseIfHTML = elseIf.init(data, rootContext);
+					debug("elseIfHTML: " + elseIfHTML);
+					html += elseIfHTML;
 					break;
 				}
 			}
 			if ( ! found ) { // no matching elseif found, running else block
 				for (var i = 0; i < this.elseBlock.length; ++i) {
-					html += this.elseBlock[i] [ blockRenderer ] (data, blockRenderer);
+					var elseHTML = this.elseBlock[i].init( data, rootContext );
+					html += elseHTML;
 				}
 			}
 		}
@@ -353,13 +353,10 @@
 	
 	ElseIfStatementNodeController.prototype = new StatementNodeController();
 	
-	ElseIfStatementNodeController.prototype.render = function(data, blockRenderer) {
-		if ( ! blockRenderer) {
-			blockRenderer = 'init';
-		}
+	ElseIfStatementNodeController.prototype.update = function(data, rootContext) {
 		var html = '';
 		for (var i = 0; i < this.block.length; ++i) {
-			html += this.block[ i ] [ blockRenderer ] (data, blockRenderer);
+			html += this.block[ i ].init(data, rootContext);
 		}
 		return html;
 	}
@@ -412,7 +409,8 @@
 			var nodes = readTree(new TokenStream(this.innerHTML), data);
 			var html = '';
 			for (var i = 0; i < nodes.length; ++i) {
-				html += nodes[i] . init( data, this );
+				var nodeHTML = nodes[i] . init( data, this );
+				html += nodeHTML;
 			};
 			$(this).html( html );
 		});
@@ -423,7 +421,7 @@
 	var Expression = function( expr, dependencies ) {
 		if ( $.isFunction( expr ) ) {
 			if (undefined === dependencies)
-				throw "dpendencies must be an array";
+				throw "dependencies must be an array";
 			this.fn = expr;
 			this.dependencies = dependencies;
 			return;
@@ -586,7 +584,11 @@
 		
 		return  {
 			fn: function(data) {
-				return ! operand.evaluate( data );
+				var operandVal = operand.evaluate( data );
+				while ( $.isFunction(operandVal)) {
+					operandVal = operandVal();
+				}
+				return ! operandVal;
 			},
 			dependencies: operand.dependencies
 		};

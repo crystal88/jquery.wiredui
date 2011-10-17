@@ -172,7 +172,7 @@ test("binary expressions", function() {
 });
 
 module("statement tags");
-/*
+/**/
 test("output tag test", function() {
 	var data = $.observable({
 		name: 'bence',
@@ -185,17 +185,20 @@ test("output tag test", function() {
 	
 	same($('#outputtest .name :first').html(), 'crystal', "value change handled properly");
 })
-
+/**/
 test("if statement", function() {
 	var data = $.observable({
 		name: "bence",
-		render: true
+		hide: false
 	});
 	$("#iftest").binddata( data );
 
+	same($('#uif :first').html(), 'bence');
 
-	data().name('crystal');
-	data().render(false);
+	data().name('bence2');
+	same($('#uif :first').html(), 'bence2');
+	data().hide(true);
+	same( $("#iftest :first").html(), '', 'condition dependency update works');
 });
 
 /**/
@@ -208,7 +211,8 @@ test("if-elseif-else tags", function() {
 	$("#ifelseiftest").binddata( data );
 	same( $("#ifelseiftest .name :first").html(), 'bence');
 	data().name("crystal");
-	//same( $("#ifelseiftest .name :first").html(), 'crystal');
-	//data().render('email');
+	same( $("#ifelseiftest .name :first").html(), 'crystal');
+	data().render('email');
+	same( $("#ifelseiftest .email :first").html(), 'crystal@cyclonephp.com');
 });
 /**/
