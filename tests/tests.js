@@ -206,6 +206,7 @@ test("if-elseif-else tags", function() {
 	var data = $.observable({
 		name: "bence",
 		email: "crystal@cyclonephp.com",
+		age: 23,
 		render: 'name'
 	});
 	$("#ifelseiftest").binddata( data );
@@ -214,5 +215,9 @@ test("if-elseif-else tags", function() {
 	same( $("#ifelseiftest .name :first").html(), 'crystal');
 	data().render('email');
 	same( $("#ifelseiftest .email :first").html(), 'crystal@cyclonephp.com');
+	data().render('both');
+	var bothCnt = $('#ifelseiftest .both');
+	same(bothCnt.find('.both-name :first').html(), 'crystal', "both-name rendered");
+	same(bothCnt.find('.both-email :first').html(), 'crystal@cyclonephp.com', "both-email rendered");
 });
 /**/

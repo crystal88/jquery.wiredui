@@ -35,8 +35,13 @@
 					<span class="name">${name}</span>
 				{{ elseif render == 'email'}}
 					<span class="email">${email}</span>
+				{{ elseif render == 'age' }}
+					<span class="age">${age}</span>
 				{{ else }}
-					<span class="nothing">nothing to render</span>
+					<span class="both">
+						<span class="both-name">name: ${name}</span>
+						<span class="both-email">email: ${email}</span>
+					</span>
 				{{/if}}
 				
 			</div>

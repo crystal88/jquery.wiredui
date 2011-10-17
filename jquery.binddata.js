@@ -7,6 +7,11 @@
 	var TokenStream = function(str) {
 		this.str = str;
 		this.inputStrLen = str.length;
+		this.unprocessedStack = [];
+	}
+	
+	TokenStream.prototype.pushUnprocessed = function(token) {
+		this.unprocessedStack.push(token);
 	}
 	
 	TokenStream.prototype.idx = 0;
@@ -18,6 +23,9 @@
 	TokenStream.prototype.currentContext = 'html';
 	
 	TokenStream.prototype.read = function() {
+		if (this.unprocessedStack.length) {
+			return this.unprocessedStack.pop();
+		}
 		var str = this.str;
 		this.currentContext = 'html';
 		var token = '';
@@ -202,8 +210,8 @@
 					d = d() [propchain[ j ]];
 				}
 				d.on('change', function() {
-					debug(propchain + " changed, rendering into " + self.containerSelector  + " :: " + self.update( data ))
-					'selected length: ' + $(rootContext).find(self.containerSelector).html(self.update( data, rootContext ));
+					//debug(propchain + " changed, rendering into " + self.containerSelector  + " :: " + self.update( data ))
+					$(rootContext).find(self.containerSelector).html(self.update( data, rootContext ));
 				});
 		}
 		return html;
@@ -275,11 +283,11 @@
 	
 	StatementNodeController.prototype = new NodeController();
 	
+	
+	
 	var IfStatementNodeController = function( condition, tokenstream ) {
-		debug("created if stmt for condition " + condition);
 		this.condition = new Expression( condition );
 		this.dependencies = this.condition.dependencies;
-		debug(this.dependencies);
 		this.block = readTree(tokenstream, {}, [{type: 'stmt', token: '/if'}]);
 		this.onTrueBlock = [];
 		this.elseIfStatements = [];
@@ -290,12 +298,10 @@
 			if (node instanceof ElseIfStatementNodeController) {
 				elseIfNodesPassed = true;
 				this.elseIfStatements.push( node );
+			} else if (node instanceof ElseStatementNodeController) {
+				this.elseStmt = node;
 			} else {
-				if (elseIfNodesPassed) {
-					this.elseBlock.push( node );
-				} else {
-					this.onTrueBlock.push( node );
-				}
+				this.onTrueBlock.push( node );
 			};
 		}
 	}
@@ -305,8 +311,6 @@
 	IfStatementNodeController.prototype.onTrueBlock = [];
 	
 	IfStatementNodeController.prototype.elseIfStatements = [];
-	
-	IfStatementNodeController.prototype.elseBlock = [];
 	
 	IfStatementNodeController.prototype.update = function(data, rootContext ) {
 		var html = '';
@@ -334,11 +338,8 @@
 					break;
 				}
 			}
-			if ( ! found ) { // no matching elseif found, running else block
-				for (var i = 0; i < this.elseBlock.length; ++i) {
-					var elseHTML = this.elseBlock[i].init( data, rootContext );
-					html += elseHTML;
-				}
+			if ( ! found && this.elseStmt) { // no matching elseif found, running else block
+				html = this.elseStmt.init(data, rootContext);
 			}
 		}
 		return html;
@@ -348,7 +349,8 @@
 		this.condition = new Expression( condition );
 		this.dependencies = this.condition.dependencies;
 		this.block = readTree(tokenstream, {}, [{type: 'stmt', token: '/if'}
-			, {type: 'stmt', token: 'else'}]);
+			, {type: 'stmt', token: 'elseif'}
+			, {type: 'stmt', token: 'else'}], null, false);
 	}
 	
 	ElseIfStatementNodeController.prototype = new StatementNodeController();
@@ -364,17 +366,27 @@
 	var ElseStatementNodeController = function( remaining, tokenstream ) {
 		if (remaining)
 			tokenstream.raiseError("unexpected '" + remaining + "'");
-		this.block = readTree(tokenstream, {type: 'stmt', token: '/if'}
+		this.block = readTree(tokenstream, {}, [{type: 'stmt', token: '/if'}]
 			, [{type: 'stmt', token: '/each'}]);
 	}
 	
 	ElseStatementNodeController.prototype = new StatementNodeController();
 	
+	ElseStatementNodeController.prototype.update = function( data, rootContext ) {
+		var html = '';
+		for (var i = 0; i < this.block.length; ++i) {
+			html += this.block[ i ].init( data, rootContext );
+		}
+		return html;
+	}
 	
 	
-	var readTree = function(tokenstream, data, readUntil, disabledTokens) {
+	var readTree = function(tokenstream, data, readUntil, disabledTokens, skipUntilToken) {
 		if ( undefined === readUntil ) {
 			readUntil = null;
+		}
+		if (undefined === skipUntilToken) {
+			skipUntilToken = true;
 		}
 		var token;
 		var rval = [];
@@ -387,13 +399,20 @@
 						found = true;
 				}
 				if ( found ) {
+					if ( ! skipUntilToken) {
+						tokenstream.pushUnprocessed(token);
+					}
 					break;
 				}
-			} else if (readUntil && token.type == readUntil.type && token.token == readUntil.token)
+			} else if (readUntil && token.type == readUntil.type && token.token == readUntil.token) {
+				if ( ! skipUntilToken) {
+					tokenstream.pushUnprocessed(token);
+				}
 				break;
+			}
 			if ( $.isArray( disabledTokens ) ) {
 				for (var i = 0; i < disabledTokens.length; ++i ) {
-					if (disabledToken[ i ] == token) {
+					if (disabledTokens[ i ] == token) {
 						tokenstream.raiseError("unexpected " + token);
 					}
 				}
