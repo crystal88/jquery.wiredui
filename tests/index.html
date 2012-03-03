@@ -9,6 +9,8 @@
 		<script type="text/javascript" src="../jquery.binddata.js"></script>
 		<script type="text/javascript" src="../../jquery.observable/jquery.observable.js"></script>
 		<script type="text/javascript" src="tests.js"></script>
+		<script type="text/javascript" src="../DOMIterator.js"></script>
+		<script type="text/javascript" src="DOMIterator.test.js"></script>
 	</head>
 	<body>
 		<h1 class="qunit-header">jquery.binddata unit tests</h1>
@@ -31,19 +33,26 @@
 
 			<h2>ifelseiftest</h2>
 			<div id="ifelseiftest">
-				{{ if render == 'name'}}
-					<span class="name">${name}</span>
-				{{ elseif render == 'email'}}
-					<span class="email">${email}</span>
-				{{ elseif render == 'age' }}
-					<span class="age">${age}</span>
+				{{ if user.render == 'name'}}
+					<span class="name">${user.name}</span>
+				{{ elseif user.render == 'email'}}
+					<span class="email">${user.email}</span>
+				{{ elseif user.render == 'age' }}
+					<span class="age">${user.age}</span>
 				{{ else }}
 					<span class="both">
-						<span class="both-name">name: ${name}</span>
-						<span class="both-email">email: ${email}</span>
+						<span class="both-name">name: ${user.name}</span>
+						<span class="both-email">email: ${user.email}</span>
 					</span>
 				{{/if}}
 				
+			</div>
+			
+			<h2>eachtest</h2>
+			<div id="eachtest">
+				{{each arr as idx => itm}}
+					<span class="each">${glob.name}</span>
+				{{/each}}
 			</div>
 		
 		</div>

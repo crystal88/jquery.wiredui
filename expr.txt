@@ -16,7 +16,7 @@ statement ::= if | elseif | else | each | assignment | endif | endeach
 if ::= 'if' expr
 elseif ::= ( 'elseif' | 'elif' | 'elsif' ) expr
 else ::= 'else'
-each ::= 'each' expr 'as' var (',' var)?
+each ::= 'each' expr 'as' var ('=>' var)?
 assignment ::= ident '=' expr
 endif ::= '/if'
 endeach ::= '/each'

@@ -209,13 +209,18 @@
 				for (var j = 0; j < propchain.length; ++j) {
 					d = d() [propchain[ j ]];
 				}
+				debug("adding listener for dep " + propchain)
 				d.on('change', function() {
-					//debug(propchain + " changed, rendering into " + self.containerSelector  + " :: " + self.update( data ))
-					$(rootContext).find(self.containerSelector).html(self.update( data, rootContext ));
+					debug(propchain + " changed, rendering into " + self.containerSelector  + " :: " + self.update( data ))
+					debug('length: ' + $(rootContext).find(self.containerSelector).html(self.update( data, rootContext )).length );
 				});
 		}
 		return html;
 	}
+	
+	NodeController.prototype.deinit = function() {
+		this.containerSelector = null;
+	};
 	
 	NodeController.prototype.dependencies = [];
 	
@@ -333,7 +338,6 @@
 				if (condition) {
 					found = true;
 					var elseIfHTML = elseIf.init(data, rootContext);
-					debug("elseIfHTML: " + elseIfHTML);
 					html += elseIfHTML;
 					break;
 				}
@@ -376,6 +380,48 @@
 		var html = '';
 		for (var i = 0; i < this.block.length; ++i) {
 			html += this.block[ i ].init( data, rootContext );
+		}
+		return html;
+	}
+	
+	var EachStatementNodeController = function(remaining, tokenstream) {
+		var asPos = remaining.lastIndexOf(' as ');
+		this.arrayExpr = new Expression(remaining.substr(0, asPos));
+		this.dependencies = this.arrayExpr.dependencies;
+		debug(this.dependencies)
+		var varStr = remaining.substr(asPos + 4);
+		var arrowPos = varStr.indexOf('=&gt;');
+		if (-1 == arrowPos) {
+			this.elemName = varStr;
+		} else {
+			this.idxName = varStr.substr(0, arrowPos);
+			this.elemName = varStr.substr(arrowPos + 5);
+		}
+		
+		this.block = readTree(tokenstream, {}, [{type: 'stmt', token: '/each'}]);
+	};
+	
+	EachStatementNodeController.prototype = new StatementNodeController();
+	
+	EachStatementNodeController.prototype.arrayExpr = null;
+	
+	EachStatementNodeController.prototype.elemName = null;
+	
+	EachStatementNodeController.prototype.idxName = null;
+	
+	EachStatementNodeController.prototype.update = function( data, rootContext ) {
+		var arr = this.arrayExpr.evaluate( data );
+		while ( $.isFunction( arr ) ) {
+			arr = arr();
+		}
+		var html = '';
+		for ( var i = 0; i < arr.length; ++i ) { //executing the block on all elems
+			for ( var b = 0; b < this.block.length; ++b ) {
+				this.block[ b ].deinit();
+				var blockHTML = this.block[ b ].init( data, rootContext );
+				debug("eahc block init: " + blockHTML);
+				html += blockHTML;
+			}
 		}
 		return html;
 	}

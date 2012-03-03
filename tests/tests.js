@@ -172,7 +172,7 @@ test("binary expressions", function() {
 });
 
 module("statement tags");
-/**/
+/**
 test("output tag test", function() {
 	var data = $.observable({
 		name: 'bence',
@@ -185,7 +185,7 @@ test("output tag test", function() {
 	
 	same($('#outputtest .name :first').html(), 'crystal', "value change handled properly");
 })
-/**/
+/**
 test("if statement", function() {
 	var data = $.observable({
 		name: "bence",
@@ -201,23 +201,39 @@ test("if statement", function() {
 	same( $("#iftest :first").html(), '', 'condition dependency update works');
 });
 
-/**/
+/**
 test("if-elseif-else tags", function() {
-	var data = $.observable({
+	var data = $.observable({user: {
 		name: "bence",
 		email: "crystal@cyclonephp.com",
 		age: 23,
 		render: 'name'
-	});
+	}});
 	$("#ifelseiftest").binddata( data );
 	same( $("#ifelseiftest .name :first").html(), 'bence');
-	data().name("crystal");
+	data().user().name("crystal");
 	same( $("#ifelseiftest .name :first").html(), 'crystal');
-	data().render('email');
+	data().user().render('email');
 	same( $("#ifelseiftest .email :first").html(), 'crystal@cyclonephp.com');
-	data().render('both');
+	data().user().render('both');
 	var bothCnt = $('#ifelseiftest .both');
 	same(bothCnt.find('.both-name :first').html(), 'crystal', "both-name rendered");
 	same(bothCnt.find('.both-email :first').html(), 'crystal@cyclonephp.com', "both-email rendered");
 });
 /**/
+
+
+test("each statement", function() {
+	var data = $.observable({
+		arr: ['a', 'b', 'c'],
+		glob: {
+			name: 'bence'
+		}
+	});
+	$('#eachtest').binddata( data );
+	same( $('#eachtest .each').length, 3, "iteration count is correct")
+	
+	data().arr([ 'a', 'b', 'c']);
+	
+	data().glob().name('crystal');
+});
