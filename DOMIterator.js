@@ -1,6 +1,6 @@
 (function($) {
 	
-	$.binddata.DOMIterator = function DOMIterator(DOM) {
+	$.wiredui.DOMIterator = function DOMIterator(DOM) {
 		var self = this;
 		
 		if (typeof(DOM) == "string") {

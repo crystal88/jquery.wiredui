@@ -1,26 +1,26 @@
 module("Expressions");
 
 test("literals", function() {
-	var expr = new $.binddata.Expression(" (null ) ");
+	var expr = new $.wiredui.Expression(" (null ) ");
 	same(null, expr.evaluate(), "null works");
-	expr = new $.binddata.Expression(" 'hey'");
+	expr = new $.wiredui.Expression(" 'hey'");
 	same('hey', expr.evaluate(), "''string works");
-	expr = new $.binddata.Expression(' "hey" ');
+	expr = new $.wiredui.Expression(' "hey" ');
 	same('hey', expr.evaluate(), '"" string works');
 	
-	expr = new $.binddata.Expression("-2.45");
+	expr = new $.wiredui.Expression("-2.45");
 	same(-2.45, expr.evaluate(), "number works");
 	
-	expr = new $.binddata.Expression("true");
+	expr = new $.wiredui.Expression("true");
 	same(true, expr.evaluate(), "boolean true works");
 	
-	expr = new $.binddata.Expression("false");
+	expr = new $.wiredui.Expression("false");
 	same(false, expr.evaluate(), "boolean false works");
 })
 
 test("variables", function() {
 	var data = $.observable({myvar: 'myval'});
-	var expr = new $.binddata.Expression("myvar");
+	var expr = new $.wiredui.Expression("myvar");
 	
 	data().myvar("changed");
 	same('changed', expr.evaluate(data)(), "simple variable")
@@ -30,26 +30,26 @@ test("variables", function() {
 			mystr: "hey"
 		}
 	});
-	expr = new $.binddata.Expression("myobj.mystr");
+	expr = new $.wiredui.Expression("myobj.mystr");
 	same('hey', expr.evaluate(data)(), "object property");
 	
-	expr = new $.binddata.Expression("non.exis.tent");
+	expr = new $.wiredui.Expression("non.exis.tent");
 	same(undefined, expr.evaluate(data), "handling non-existent property correctly");
 })
 
 test("unary operators", function() {
-	var expr = new $.binddata.Expression("! false");
+	var expr = new $.wiredui.Expression("! false");
 	same(true, expr.evaluate({}), "! works");
 	
-	var expr = new $.binddata.Expression("not ((false))");
+	var expr = new $.wiredui.Expression("not ((false))");
 	same(true, expr.evaluate({}), "'not' works");
 	
-	var expr = new $.binddata.Expression("not ! true");
+	var expr = new $.wiredui.Expression("not ! true");
 	same(true, expr.evaluate({}), "'not not' works");
 });
 
 function testBinExpr(expr, data, result) {
-	var xpr = new $.binddata.Expression(expr);
+	var xpr = new $.wiredui.Expression(expr);
 	data = $.observable(data);
 	same(xpr.evaluate(data), result, expr);
 }

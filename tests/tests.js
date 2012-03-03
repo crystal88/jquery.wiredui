@@ -15,7 +15,7 @@ test("output tag test", function() {
 		name: 'bence',
 		email: 'crystal@cyclonephp.com'
 	})
-	$('#outputtest').binddata( data );
+	$('#outputtest').wiredui( data );
 	same($('#outputtest .name :first').html(), 'bence', "initial name");
 	same($('#outputtest .email :first').html(), 'crystal@cyclonephp.com', "initial email");
 	data().name('crystal');
@@ -28,7 +28,7 @@ test("if statement", function() {
 		name: "bence",
 		hide: false
 	});
-	$("#iftest").binddata( data );
+	$("#iftest").wiredui( data );
 
 	same($('#uif :first').html(), 'bence');
 
@@ -46,7 +46,7 @@ test("if-elseif-else tags", function() {
 		age: 23,
 		render: 'name'
 	}});
-	$("#ifelseiftest").binddata( data );
+	$("#ifelseiftest").wiredui( data );
 	same( $("#ifelseiftest .name :first").html(), 'bence');
 	data().user().name("crystal");
 	same( $("#ifelseiftest .name :first").html(), 'crystal');
@@ -67,7 +67,7 @@ test("each statement", function() {
 			name: 'bence'
 		}
 	});
-	$('#eachtest').binddata( data );
+	$('#eachtest').wiredui( data );
 	same( $('#eachtest .each').length, 3, "iteration count is correct")
 	
 	data().arr([ 'a', 'b', 'c']);

@@ -187,7 +187,7 @@
 		var html = '';
 		if ( ! this.containerSelector || $(rootContext).find(this.containerSelector).length == 0) {
 			if ( ! this.containerSelector ) {
-				this.containerSelector = 'jquery-binddata-' + UniqId.next();
+				this.containerSelector = 'jquery-wiredui-' + UniqId.next();
 			}
 			var containerSelector = this.containerSelector;
 			html += '<' + containerSelector + '>';
@@ -464,7 +464,7 @@
 		return rval;
 	}
 	
-	$.fn.binddata = function(data) {
+	$.fn.wiredui = function(data) {
 		
 		this.each(function() {
 			var nodes = readTree(new TokenStream(this.innerHTML), data);
@@ -854,7 +854,7 @@
 	/**
 	 * Exploding some classes for unit testing
 	 */
-	$.binddata = {
+	$.wiredui = {
 		TokenStream: TokenStream,
 		Expression: Expression,
 		readTree: readTree

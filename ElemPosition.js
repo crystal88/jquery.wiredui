@@ -1,6 +1,6 @@
 (function($) {
 	
-	$.binddata.ElemPosition = function(parentElem, idx) {
+	$.wiredui.ElemPosition = function(parentElem, idx) {
 		
 		this.parentElem = parentElem;
 		

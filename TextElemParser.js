@@ -4,7 +4,7 @@
 		return token.replace(/\s+$/, '').replace(/^\s+/, '');
 	}
 	
-	var TextElemParser = $.binddata.TextElemParser = function(str) {
+	var TextElemParser = $.wiredui.TextElemParser = function(str) {
 		this.str = str;
 		this.inputStrLen = str.length;
 		this.unprocessedStack = [];

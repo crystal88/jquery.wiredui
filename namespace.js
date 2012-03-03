@@ -1,13 +1,13 @@
 (function($) {
 	
-	$.binddata = function(tpl, data) {
-		$.binddata.buildController(tpl, data);
+	$.wiredui = function(tpl, data) {
+		$.wiredui.buildController(tpl, data);
 		return this;
 	}
 	
-	$.binddata.buildController = function(tpl, data) {
-		var iterator = new $.binddata.DOMIterator(tpl);
-		var ctrl = new $.binddata.NodeController(data);
+	$.wiredui.buildController = function(tpl, data) {
+		var iterator = new $.wiredui.DOMIterator(tpl);
+		var ctrl = new $.wiredui.NodeController(data);
 		iterator.listener = ctrl;
 		ctrl.iterator = iterator;
 		iterator.read();

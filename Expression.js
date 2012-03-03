@@ -4,7 +4,7 @@
 		return token.replace(/\s+$/, '').replace(/^\s+/, '');
 	}
 	
-	var Expression = $.binddata.Expression = function( expr, dependencies ) {
+	var Expression = $.wiredui.Expression = function( expr, dependencies ) {
 		if ( $.isFunction( expr ) ) {
 			if (undefined === dependencies)
 				throw "dependencies must be an array";

@@ -1,14 +1,14 @@
 (function($) {
 
-	$.binddata.ChildNodeController = function() {
+	$.wiredui.ChildNodeController = function() {
 		
 		/* Array<DOMElem */
 		this.lastCreatedElems = [];
 		
-		/* $.binddata.NodeController */
+		/* $.wiredui.NodeController */
 		this.nodeController = null;
 		
-		/* $.binddata.ElemPosition */
+		/* $.wiredui.ElemPosition */
 		this.position = null;
 	};
 

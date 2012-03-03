@@ -1,7 +1,7 @@
 module("DOMIterator")
 test("Iteration failing without listener", function() {
 	
-	var iterator = new $.binddata.DOMIterator("<html></html>");
+	var iterator = new $.wiredui.DOMIterator("<html></html>");
 	
 	var failed = false;
 	try {
@@ -15,7 +15,7 @@ test("Iteration failing without listener", function() {
 
 test("Iteration test", function() {
 	
-	var iterator = new $.binddata.DOMIterator("<html><div>x</div><div/></html>");
+	var iterator = new $.wiredui.DOMIterator("<html><div>x</div><div/></html>");
 	
 	var openCount = 0;
 	var maxDepth = 0;

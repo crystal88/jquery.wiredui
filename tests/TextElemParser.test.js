@@ -1,12 +1,12 @@
 module("TextNodeParser");
 
 function tokens(str) {
-	var stream = new $.binddata.TextElemParser(str);
+	var stream = new $.wiredui.TextElemParser(str);
 	return stream.readAll();
 }
 
 test("Reading plain HTML", function(){
-	var stream = new $.binddata.TextElemParser("foo<bar/>");
+	var stream = new $.wiredui.TextElemParser("foo<bar/>");
 	var tokens = stream.readAll();
 	same(tokens, [{
 		type: 'html',
