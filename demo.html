@@ -1,0 +1,17 @@
+<html>
+	<head>
+		<title>jquery.boundform demo</title>
+	</head>
+	<body>
+		<h1>jquery.boundform demo</h1>
+		
+		<div id="form">
+			<input type="text" bind="${user.name}"/>
+			<ul>
+				{{foreach user.emails email}}
+					<li class="email"> ${email} </li>
+				{{/foreach}}
+			</ul>
+		</div>
+	</body>
+</html>

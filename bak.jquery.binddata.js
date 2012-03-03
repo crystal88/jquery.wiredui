@@ -1,9 +1,5 @@
 (function($) {
 	
-	var trim = function(token) {
-		return token.replace(/\s+$/, '').replace(/^\s+/, '');
-	}
-	
 	var TokenStream = function(str) {
 		this.str = str;
 		this.inputStrLen = str.length;
@@ -499,72 +495,6 @@
 			this.dependencies = compiledExpr.dependencies;
 		}
 	};
-	
-	Expression.buildExprFn = function( expr ) {
-		if (expr.charAt(0) == '(') {
-			if (expr.charAt(expr.length - 1) !== ')') {
-				return Expression.buildSimpleExpr(expr)
-				throw "missing closing bracket in expression '" + expr + "'";
-			}
-			var simpleExpr = trim( expr.substr(1, expr.length - 2) );
-			return Expression.buildExprFn( simpleExpr );
-		}
-		return Expression.buildSimpleExpr(expr);
-	}
-	
-	Expression.buildSimpleExpr = function( expr ) {
-		var builders = [Expression.buildLiteralExpr
-			, Expression.buildVariableExpr
-			, Expression.buildOperatorExpr];
-		for ( var i = 0; i < builders.length; ++i ) {
-			var candidate = builders[ i ] ( expr );
-			if (candidate !== null )
-				return candidate;
-		}
-		return null;
-	};
-	
-	Expression.buildLiteralExpr = function( expr ) {
-		var literalBuilders = [Expression.buildNullLiteralExpr
-			, Expression.buildStringLiteralExpr
-			, Expression.buildBooleanLiteralExpr
-			, Expression.buildNumberLiteralExpr];
-		for ( var i = 0; i < literalBuilders.length; ++i ) {
-			var candidate = literalBuilders[i] ( expr );
-			if (candidate !== null)
-				return {
-					fn: candidate,
-				};
-		}
-		return null;
-	}
-	
-	Expression.buildStringLiteralExpr = function( expr ) {
-		var firstChar = expr.charAt(0);
-		var lastChar = expr.charAt(expr.length - 1);
-		if ( (firstChar === '"' && lastChar === '"')
-			|| (firstChar === "'" && lastChar === "'") ) {
-			
-			var terminator = firstChar;
-			var escaped = false;
-			for (var i = 1; i < expr.length - 1; ++i ) {
-				var chr = expr.charAt(i);
-				if ( chr === '\\' ) {
-					escaped = ! escaped;
-					continue;
-				}
-				if ( chr === terminator && ! escaped ) { // an unescaped string identifier found in the middle of the string - it can't be a string literal
-					return null;
-				}
-			}
-			var rval = expr.substr(1, expr.length - 2);
-			return function() {
-				return rval;
-			}
-		} else {
-			return null;
-		}
-	}
 	
 	Expression.buildNullLiteralExpr = function(expr) {
 		if (expr.toLowerCase() !== 'null') // it's not a null literal

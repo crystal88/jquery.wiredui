@@ -33,7 +33,9 @@ test("Iteration test", function() {
     };
 	iterator.read();
 	same(openCount, 0, "all elems opened-closed");
-	same(maxDepth, 3, "max depth is 3");
-	
-	
+	same(maxDepth, 3, "max depth is 3");	
 });
+
+module("NodeController");
+
+
