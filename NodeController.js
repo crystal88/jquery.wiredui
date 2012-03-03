@@ -50,7 +50,13 @@
 		while ( (token = parser.read()) !== null) {
 			switch(token.type) {
 				case "output":
-					
+					var childNodeCtrl = new $.wiredui.ChildNodeController();
+					var pos = new $.wiredui.ElemPosition();
+					pos.idx = this.currentParent.childNodes.length;
+					pos.parentElem = this.currentParent;
+					childNodeCtrl.position = pos;
+					childNodeCtrl.nodeController = new $.wiredui.OutputNodeController(this.varCtx, token.token);
+					this.childNodeControllers.push(childNodeCtrl);
 					break;
 				case "stmt":
 					this.createChildNodeController(token.token);
@@ -86,15 +92,15 @@
 		}
 		switch( stmtWord ) {
 			case 'if':
-				rval = new $.wiredui.IfStatementNodeController(remaining);
+				rval = new $.wiredui.IfStatementNodeController(this.varCtx, remaining);
 			case 'elseif':
 			case 'elif':
 			case 'elsif':
-				rval = new $.wiredui.ElseIfStatementNodeController(remaining);
+				rval = new $.wiredui.ElseIfStatementNodeController(this.varCtx, remaining);
 			case 'else':
-				rval = new $.wiredui.ElseStatementNodeController(remaining);
+				rval = new $.wiredui.ElseStatementNodeController(this.varCtx, remaining);
 			case 'each':
-				rval = new $.wiredui.EachStatementNodeController(remaining);
+				rval = new $.wiredui.EachStatementNodeController(this.varCtx, remaining);
 			default:
 				throw "invalid statement tag '" + str + "'";
 		}
