@@ -36,6 +36,4 @@ test("Iteration test", function() {
 	same(maxDepth, 3, "max depth is 3");	
 });
 
-module("NodeController");
-
 

@@ -1,0 +1,10 @@
+
+
+${name} hello
+<div>
+	<ul>
+		{{each items as a => b}}
+		<li>${a} ${b}<br/>{{if a % 2 == 0}}even{{else}}odd{{/if}}</li>
+		{{/each}}
+	</ul>
+</div>
