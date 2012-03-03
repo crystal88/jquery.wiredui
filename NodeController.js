@@ -3,9 +3,7 @@
     var NodeController = $.binddata.NodeController = function NodeController(varCtx) {
 		this.varCtx = varCtx;
 		
-		this.rootElems = [];
-		
-		this.currentContainer = this.rootElems;
+		this.childNodes = [];
 		
 		this.childNodeControllers = [];
 		
@@ -17,11 +15,10 @@
 		/** $.binddata.DOMIterator */
 		this.iterator = null;
 		
-		this.DOMElemCntStack = [ ];
 		
 		this.parentStack = [ ];
 		
-		this.currentParent = null;
+		this.currentParent = this;
 	};
 	
 	NodeController.prototype.startElem = function(elem) {
@@ -36,13 +33,15 @@
 				newElem.removeChild(newElem.childNodes[0]);
 			}
 			
-			this.currentContainer.push(newElem);
-			this.DOMElemCntStack.push(this.currentContainer);
-			this.currentContainer = newElem.childNodes;
+			this.currentParent.appendChild(newElem);
 			
 			this.parentStack.push(this.currentParent);
 			this.currentParent = newElem;
 		}
+	};
+	
+	NodeController.prototype.appendChild = function(child) {
+		this.childNodes.push(child);
 	};
 	
 	NodeController.prototype.readTextElem = function(str) {
@@ -66,7 +65,7 @@
 	NodeController.prototype.createChildNodeController = function(str) {
 		var childNodeCtrl = new $.binddata.ChildNodeController();
 		var pos = new $.binddata.ElemPosition();
-		pos.idx = this.currentContainer.length;
+		pos.idx = this.currentParent.childNodes.length;
 		pos.parentElem = this.currentParent;
 		childNodeCtrl.position = pos;
 		var nodeController = childNodeCtrl.nodeController = this.createStatementController(str);
@@ -87,15 +86,15 @@
 		}
 		switch( stmtWord ) {
 			case 'if':
-				rval = new IfStatementNodeController( remaining, tokenstream );
+				rval = new $.binddata.IfStatementNodeController(remaining);
 			case 'elseif':
 			case 'elif':
 			case 'elsif':
-				rval = new ElseIfStatementNodeController(remaining);
+				rval = new $.binddata.ElseIfStatementNodeController(remaining);
 			case 'else':
-				rval = new ElseStatementNodeController(remaining);
+				rval = new $.binddata.ElseStatementNodeController(remaining);
 			case 'each':
-				rval = new EachStatementNodeController(remaining);
+				rval = new $.binddata.EachStatementNodeController(remaining);
 			default:
 				throw "invalid statement tag '" + str + "'";
 		}
@@ -104,14 +103,12 @@
 	};
 	
 	NodeController.prototype.finishElem = function(elem) {
-		if (this.DOMElemCntStack.length == 0)
+		if (this.parentStack.length == 0)
 			throw "failed finishElem: no opened elem";
-		
-		this.currentContainer = this.DOMElemCntStack.pop();
 		
 		this.currentParent = this.parentStack.pop();
 		
-		if (this.DOMElemCntStack.length == 0) {
+		if (this.parentStack.length == 0) {
 			this.iterator.listener = this.parentController;
 		}
 	}
