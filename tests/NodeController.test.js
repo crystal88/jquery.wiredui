@@ -1,6 +1,6 @@
 module("NodeController");
 /**/
-test("OutputNode creation", function() {
+test("OutputNode syntax tree", function() {
 	
 	var ctrl = $.wiredui.buildController("<div1><span>txt${txt}</span><p></p></div1>", {
 		"var1": 1
@@ -19,7 +19,7 @@ test("OutputNode creation", function() {
 	
 });
 /**/
-test("IfNode creation", function() {
+test("If syntax tree", function() {
 	
 	var ctrl = $.wiredui.buildController("<div1>{{if true}}beforeSpan<span>beforeOut${a}</span>afterSpan{{/if}}</div1>", {
 		a: 'aa'
@@ -56,7 +56,7 @@ test("IfNode creation", function() {
 	same(outPos.parentElem, ifCtrl.childNodes[1]);
 });
 
-test("ElseIf - Else data structure", function() {
+test("ElseIf - Else syntax tree", function() {
 	
 	var ctrl = $.wiredui.buildController("<div1>{{if true}}<span>if</span>"
 		+ "{{elseif true}}<span>elseif${elif}</span>"
@@ -86,5 +86,23 @@ test("ElseIf - Else data structure", function() {
 	same(elseCtrl.childNodes.length, 1);
 	same(elseCtrl.childNodes[0].nodeName, "span");
 	same(elseCtrl.childNodes[0].childNodes[0].nodeValue, "else");
+	
+});
+
+test("Each syntax trees", function() {
+	var ctrl = $.wiredui.buildController("<div1>{{each arr as idx=>elem}}<span>${idx}</span>"
+		+ "<span>${elem}</span>{{/each}}</div1>");
+		
+	same(ctrl.childNodes.length, 1);
+	same(ctrl.childNodes[0].childNodes.length, 0);
+		
+	same(ctrl.childNodeControllers.length, 1);
+	
+	var eachCtrl = ctrl.childNodeControllers[0].nodeController;
+	ok(eachCtrl instanceof $.wiredui.EachNodeController);
+	
+	same(eachCtrl.arrVarName, "arr");
+	same(eachCtrl.idxVarName, "idx");
+	same(eachCtrl.elemVarName, "elem");
 	
 });

@@ -17,6 +17,9 @@
 	IfNodeController.lastCreatedIf = null;
 	
 	IfNodeController.appendElseIf = function(elseIfController) {
+		if (this.lastCreatedIf === null)
+			throw "syntax error: unexpected 'else'";
+			
 		if (this.lastCreatedIf.elseNode !== null)
 			throw "syntax error: unexpected 'elseif' after 'else'";
 			
@@ -24,6 +27,9 @@
 	};
 	
 	IfNodeController.appendElse = function(elseController) {
+		if (this.lastCreatedIf === null)
+			throw "syntax error: unexpected 'else'";
+			
 		if (this.lastCreatedIf.elseNode !== null)
 			throw "syntax error: unexpected 'else'";
 			
