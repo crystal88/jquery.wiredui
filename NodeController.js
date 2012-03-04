@@ -1,6 +1,13 @@
 (function($) {
 
     var NodeController = $.wiredui.NodeController = function NodeController(varCtx) {
+		this.initNode(varCtx);
+		
+		/** $.wiredui.NodeController */
+		this.parentController = null;
+	};
+	
+	NodeController.prototype.initNode = function(varCtx) {
 		this.varCtx = varCtx;
 		
 		this.childNodes = [];
@@ -9,9 +16,6 @@
 		
 		this.readDepth = 0;
 		
-		/** $.wiredui.NodeController */
-		this.parentController = null;
-		
 		/** $.wiredui.DOMIterator */
 		this.iterator = null;
 		
@@ -19,7 +23,7 @@
 		this.parentStack = [ this ];
 		
 		this.currentParent = this;
-	};
+	}
 	
 	NodeController.prototype.startElem = function(elem) {
 		++this.readDepth;
@@ -48,6 +52,7 @@
 		var parser = new $.wiredui.TextElemParser(str);
 		var token = null;
 		while ( (token = parser.read()) !== null) {
+			console.log(token);
 			switch(token.type) {
 				case "output":
 					var childNodeCtrl = new $.wiredui.ChildNodeController();
@@ -55,11 +60,14 @@
 					pos.idx = this.currentParent.childNodes.length;
 					pos.parentElem = this.currentParent;
 					childNodeCtrl.position = pos;
-					childNodeCtrl.nodeController = new $.wiredui.OutputNodeController(this.varCtx, token.token);
+					childNodeCtrl.nodeController = new $.wiredui.OutputNodeController(this.varCtx
+						, this
+						, token.token);
 					this.childNodeControllers.push(childNodeCtrl);
 					break;
 				case "stmt":
-					this.createChildNodeController(token.token);
+					var nodeController = this.createChildNodeController(token.token);
+					this.iterator.listener = nodeController
 					break;
 				case "html":
 					this.currentParent.appendChild(document.createTextNode(token.token));
@@ -92,25 +100,30 @@
 		}
 		switch( stmtWord ) {
 			case 'if':
-				rval = new $.wiredui.IfStatementNodeController(this.varCtx, remaining);
+				rval = new $.wiredui.IfNodeController(this.varCtx, this, remaining);
+				break;
 			case 'elseif':
 			case 'elif':
 			case 'elsif':
-				rval = new $.wiredui.ElseIfStatementNodeController(this.varCtx, remaining);
+				rval = new $.wiredui.ElseIfNodeController(this.varCtx, this, remaining);
+				break;
 			case 'else':
-				rval = new $.wiredui.ElseStatementNodeController(this.varCtx, remaining);
+				rval = new $.wiredui.ElseNodeController(this.varCtx, this, remaining);
+				break;
 			case 'each':
-				rval = new $.wiredui.EachStatementNodeController(this.varCtx, remaining);
+				rval = new $.wiredui.EachNodeController(this.varCtx, this, remaining);
+				break;
 			default:
 				throw "invalid statement tag '" + str + "'";
 		}
 		rval.iterator = this.iterator;
 		rval.parentController = this;
+		return rval;
 	};
 	
 	NodeController.prototype.finishElem = function(elem) {
 		if (this.parentStack.length == 0)
-			throw "failed finishElem: no opened elem";
+			throw "failed finishElem" + elem.nodeName + ": no opened elem";
 		
 		this.currentParent = this.parentStack.pop();
 		

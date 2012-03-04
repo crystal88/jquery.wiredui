@@ -22,12 +22,16 @@
 			var childNodes = parentNode.childNodes;
 			for (var i = 0; i < childNodes.length; ++i) {
 				var childNode = childNodes[i];
+				console.log("itt: " + $.isFunction(self.listener.startElem)
+					+ " " + $.isFunction(self.listener.finishElem)
+					+ " " + $.isFunction(self.read));
+				console.log(self.listener)
+				console.log(childNode)
 				self.listener.startElem(childNode);
 				self.read(childNode);
 				self.listener.finishElem(childNode);
 			}
-			
-			
+			console.log("finished reading " + parentNode.nodeName)
 		}
 	};
 	

@@ -7,7 +7,7 @@
 	
 	$.wiredui.buildController = function(tpl, data) {
 		var iterator = new $.wiredui.DOMIterator(tpl);
-		var ctrl = new $.wiredui.NodeController(data);
+		var ctrl = new $.wiredui.NodeController($.observable(data));
 		iterator.listener = ctrl;
 		ctrl.iterator = iterator;
 		iterator.read();

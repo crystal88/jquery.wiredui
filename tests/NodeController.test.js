@@ -1,6 +1,6 @@
 module("NodeController");
-
-test("hello", function() {
+/**
+test("OutputNode creation", function() {
 	
 	var ctrl = $.wiredui.buildController("<div1><span>txt${txt}</span><p></p></div1>", {
 		"var1": 1
@@ -15,8 +15,15 @@ test("hello", function() {
 	var pos = ctrl.childNodeControllers[0].position;
 	same(1, pos.idx);
 	same(ctrl.childNodes[0].childNodes[0], pos.parentElem);
-	same($.wiredui.OutputNodeController, childCtrl.constructor);
+	same(childCtrl.parentController, ctrl);
 	
+});
+/**/
+test("IfNode creation", function() {
+	
+	var ctrl = $.wiredui.buildController("<div1>{{if true}} --<span> ${a}</span>-- {{/if}}</div1>", {
+		a: 'aa'
+	});
 	
 });
 
