@@ -56,3 +56,35 @@ test("IfNode creation", function() {
 	same(outPos.parentElem, ifCtrl.childNodes[1]);
 });
 
+test("ElseIf - Else data structure", function() {
+	
+	var ctrl = $.wiredui.buildController("<div1>{{if true}}<span>if</span>"
+		+ "{{elseif true}}<span>elseif${elif}</span>"
+		+ "{{else}}<span>else</span>{{/if}}</div1>");
+		
+	same(ctrl.childNodeControllers.length, 1);
+	
+	var ifCtrl = ctrl.childNodeControllers[0].nodeController;
+	var ifPos = ctrl.childNodeControllers[0].position;
+	
+	same(ifCtrl.childNodes.length, 1);
+	same(ifCtrl.childNodes[0].nodeName, "span");
+	same(ifCtrl.childNodes[0].childNodes[0].nodeValue, "if");
+	
+	same(ifCtrl.elseIfNodes.length, 1);
+	
+	var elseIfCtrl = ifCtrl.elseIfNodes[0];
+	same(elseIfCtrl.childNodes.length, 1);
+	same(elseIfCtrl.childNodes[0].nodeName, "span");
+	same(elseIfCtrl.childNodes[0].childNodes[0].nodeValue, "elseif");
+	
+	var elseIfOutCtrl = elseIfCtrl.childNodeControllers[0].nodeController;
+	ok(elseIfOutCtrl instanceof $.wiredui.OutputNodeController);
+	same(elseIfOutCtrl.outputVarName, "elif")
+	
+	var elseCtrl = ifCtrl.elseNode;
+	same(elseCtrl.childNodes.length, 1);
+	same(elseCtrl.childNodes[0].nodeName, "span");
+	same(elseCtrl.childNodes[0].childNodes[0].nodeValue, "else");
+	
+});

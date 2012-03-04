@@ -91,13 +91,27 @@
 		var nodeController = childNodeCtrl.nodeController = this.createStatementController(str);
 		if (nodeController !== null) {
 			if (nodeController !== this.parentController) {
-				this.childNodeControllers.push(childNodeCtrl);
+				if (nodeController instanceof $.wiredui.ElseIfNodeController) {
+					$.wiredui.IfNodeController.appendElseIf(nodeController);
+				} else if (nodeController instanceof $.wiredui.ElseNodeController) {
+					$.wiredui.IfNodeController.appendElse(nodeController);
+				} else {
+					this.childNodeControllers.push(childNodeCtrl);
+				}
 			}
 			return nodeController;
 		}
 		return null;
 	};
 	
+	/**
+	 * Helper function to explode the command name (string part before the first space)
+	 * and the command-specific parts.
+	 * 
+	 * @usedby NodeController.prototype.createStatementController()
+	 * @usedby IfNodeController.prototype.createStatementController()
+	 * 
+	 */
 	NodeController.stmtParts = function(str) {
 		var firstSpacePos = str.indexOf(" ");
 		if (firstSpacePos == -1) {
