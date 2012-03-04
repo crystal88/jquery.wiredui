@@ -49,10 +49,10 @@
 	};
 	
 	NodeController.prototype.readTextElem = function(str) {
-		var parser = new $.wiredui.TextElemParser(str);
+		var parser = this.parser = new $.wiredui.TextElemParser(str);
 		var token = null;
 		while ( (token = parser.read()) !== null) {
-			console.log(token);
+			// console.log(token);
 			switch(token.type) {
 				case "output":
 					var childNodeCtrl = new $.wiredui.ChildNodeController();
@@ -67,13 +67,19 @@
 					break;
 				case "stmt":
 					var nodeController = this.createChildNodeController(token.token);
-					this.iterator.listener = nodeController
+					if (nodeController !== null) {
+						// console.log("switching listener at "+token.token);
+						// console.log(nodeController);
+						this.iterator.listener = nodeController;
+						this.iterator.pushTextNode(parser.getUnread());
+					}
 					break;
 				case "html":
 					this.currentParent.appendChild(document.createTextNode(token.token));
 					break;
 			}
 		}
+		this.parser = null;
 	}
 	
 	NodeController.prototype.createChildNodeController = function(str) {
@@ -83,13 +89,16 @@
 		pos.parentElem = this.currentParent;
 		childNodeCtrl.position = pos;
 		var nodeController = childNodeCtrl.nodeController = this.createStatementController(str);
-		this.childNodeControllers.push(childNodeCtrl);
-		return nodeController;
+		if (nodeController !== null) {
+			if (nodeController !== this.parentController) {
+				this.childNodeControllers.push(childNodeCtrl);
+			}
+			return nodeController;
+		}
+		return null;
 	};
 	
-	NodeController.prototype.createStatementController = function(str) {
-		var rval = null;
-		
+	NodeController.stmtParts = function(str) {
 		var firstSpacePos = str.indexOf(" ");
 		if (firstSpacePos == -1) {
 			var stmtWord = str;
@@ -98,6 +107,17 @@
 			var stmtWord = str.substr(0, firstSpacePos);
 			var remaining = str.substr(firstSpacePos);
 		}
+		return {
+			"stmtWord" : stmtWord,
+			"remaining": remaining
+		};
+	}
+	
+	NodeController.prototype.createStatementController = function(str) {
+		var rval = null;
+		stmtParts = NodeController.stmtParts(str);
+		var stmtWord = stmtParts.stmtWord;
+		var remaining = stmtParts.remaining;
 		switch( stmtWord ) {
 			case 'if':
 				rval = new $.wiredui.IfNodeController(this.varCtx, this, remaining);
@@ -122,14 +142,20 @@
 	};
 	
 	NodeController.prototype.finishElem = function(elem) {
+		if (elem.nodeName == "#text")
+			// not much to do here
+			return;
+			
 		if (this.parentStack.length == 0)
-			throw "failed finishElem" + elem.nodeName + ": no opened elem";
+			throw "failed finishElem " + elem.nodeName + ": no opened elem";
 		
 		this.currentParent = this.parentStack.pop();
 		
-		if (this.parentStack.length == 0) {
+		/*if (this.parentStack.length == 0) {
 			this.iterator.listener = this.parentController;
-		}
+			console.log("setting listener to parentController:")
+			console.log(this.parentController)
+		}*/
 	}
 
 })(jQuery);

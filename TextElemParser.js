@@ -117,6 +117,15 @@
 		return rval;
 	}
 	
+	TextElemParser.prototype.getUnread = function() {
+		var rval = "";
+		var token = null;
+		while( (token = this.read()) !== null) {
+			rval += token.token;
+		}
+		return rval;
+	}
+	
 	TextElemParser.prototype.nextChar = function() {
 		if ( this.idx >= this.inputStrLen - 1 )
 			return null;
