@@ -106,3 +106,13 @@ test("Each syntax trees", function() {
 	same(eachCtrl.elemVarName, "elem");
 	
 });
+
+test("NodeController.render()", function() {
+		var ctrl = $.wiredui.buildController("<div><span/></div>");
+		var DOM = ctrl.render();
+		
+		same(DOM.length, 1);
+		same(DOM[0].tagName, "div");
+		same(DOM[0].childNodes.length, 1);
+		same(DOM[0].childNodes[0].tagName, "span");
+});

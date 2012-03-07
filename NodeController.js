@@ -172,5 +172,35 @@
 			console.log(this.parentController)
 		}*/
 	}
+	
+	NodeController.prototype.render = function() {
+		// wrapping the result into a div
+		var rval = document.createElement("div");
+		for(var i = 0; i < this.childNodes.length; ++i) {
+			rval.appendChild(this.childNodes[i]);
+		}
+		var idxShift = 0;
+		for (i = 0; i < this.childNodeControllers.length; ++i) {
+			var pos = this.childNodeControllers[i].position;
+			var ctrl = this.childNodeControllers[i].nodeController;
+			
+			var nodeStack = document.createElement("div");
+			
+			for(var i = pos.idx + idxShift; i < pos.parentElem.childNodes.length; ++i) {
+				nodeStack.appendChild(pos.parentElem.childNodes[i]);
+			}
+			
+			var ctrlDOM = ctrl.render();
+			for (i = 0; i < ctrlDOM.length; ++i) {
+				pos.parentElem.appendChild(ctrlDOM[i]);
+			}
+			
+			for (i = 0; i < nodeStack.childNodes.length; ++i) {
+				pos.parentElem.appendChild(nodeStack.childNodes[i]);
+			}
+			idxShift += nodeStack.childNodes.length;
+		}
+		return rval.childNodes;
+	}
 
 })(jQuery);
