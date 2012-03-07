@@ -132,20 +132,21 @@
 		stmtParts = NodeController.stmtParts(str);
 		var stmtWord = stmtParts.stmtWord;
 		var remaining = stmtParts.remaining;
+		var varCtx = this.varCtx.copy();
 		switch( stmtWord ) {
 			case 'if':
-				rval = new $.wiredui.IfNodeController(this.varCtx, this, remaining);
+				rval = new $.wiredui.IfNodeController(varCtx, this, remaining);
 				break;
 			case 'elseif':
 			case 'elif':
 			case 'elsif':
-				rval = new $.wiredui.ElseIfNodeController(this.varCtx, this, remaining);
+				rval = new $.wiredui.ElseIfNodeController(varCtx, this, remaining);
 				break;
 			case 'else':
-				rval = new $.wiredui.ElseNodeController(this.varCtx, this, remaining);
+				rval = new $.wiredui.ElseNodeController(varCtx, this, remaining);
 				break;
 			case 'each':
-				rval = new $.wiredui.EachNodeController(this.varCtx, this, remaining);
+				rval = new $.wiredui.EachNodeController(varCtx, this, remaining);
 				break;
 			default:
 				throw "invalid statement tag '" + str + "'";
