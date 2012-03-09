@@ -80,7 +80,6 @@ test("ElseIf - Else syntax tree", function() {
 	
 	var elseIfOutCtrl = elseIfCtrl.childNodeControllers[0].nodeController;
 	ok(elseIfOutCtrl instanceof $.wiredui.OutputNodeController);
-	same(elseIfOutCtrl.outputVarName, "elif")
 	
 	var elseCtrl = ifCtrl.elseNode;
 	same(elseCtrl.childNodes.length, 1);
