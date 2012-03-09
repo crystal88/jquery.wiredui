@@ -186,17 +186,17 @@
 			
 			var nodeStack = document.createElement("div");
 			
-			for(var i = pos.idx + idxShift; i < pos.parentElem.childNodes.length; ++i) {
+			for(var j = pos.idx + idxShift; j < pos.parentElem.childNodes.length; ++j) {
 				nodeStack.appendChild(pos.parentElem.childNodes[i]);
 			}
 			
 			var ctrlDOM = ctrl.render();
-			for (i = 0; i < ctrlDOM.length; ++i) {
-				pos.parentElem.appendChild(ctrlDOM[i]);
+			for (j = 0; j < ctrlDOM.length; ++j) {
+				pos.parentElem.appendChild(ctrlDOM[j]);
 			}
 			
-			for (i = 0; i < nodeStack.childNodes.length; ++i) {
-				pos.parentElem.appendChild(nodeStack.childNodes[i]);
+			for (j = 0; j < nodeStack.childNodes.length; ++j) {
+				pos.parentElem.appendChild(nodeStack.childNodes[j]);
 			}
 			idxShift += nodeStack.childNodes.length;
 		}

@@ -116,3 +116,17 @@ test("NodeController.render()", function() {
 		same(DOM[0].childNodes.length, 1);
 		same(DOM[0].childNodes[0].tagName, "span");
 });
+
+test("OutputNodeController.render()", function() {
+	var ctrl = $.wiredui.buildController("<div>${xx}<span>${yy.aa}</span></div>", {
+		xx: "xx",
+		yy: {
+			aa: "aa"
+		}
+	});
+	
+	var DOM = ctrl.render();
+	console.log(DOM);
+	same(DOM[0].childNodes[0].nodeValue, "xx");
+	same(DOM[0].childNodes[1].childNodes[0].nodeValue, "aa");
+});

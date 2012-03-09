@@ -18,4 +18,16 @@
 		return new VarContext($.observable(copiedData));
 	}
 	
+	VarContext.prototype.getValue = function(path) {
+		if (path.indexOf(".") === -1) {
+			return this.data()[path];
+		};
+		var current = this.data;
+		var segments = path.split(".");
+		for (var i = 0; i < segments.length; ++i) {
+			current = current()[segments[i]];
+		}
+		return current;
+	};
+	
 })(jQuery);
