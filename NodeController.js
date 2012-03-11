@@ -27,7 +27,9 @@
 	
 	NodeController.prototype.setupListeners = function(deps) {
 		var self = this;
-		var reRender = function() {console.log("reRender()")}
+		var reRender = function() {
+			self.parentController.update(this);
+		}
 		for (var i = 0; i < deps.length; ++i) {
 			var depChain = deps[i];
 			
@@ -230,6 +232,10 @@
 			idxShift += nodeStack.childNodes.length;
 		}
 		return rval.childNodes;
+	}
+	
+	NodeController.prototype.update = function(childCtrl) {
+		
 	}
 
 })(jQuery);

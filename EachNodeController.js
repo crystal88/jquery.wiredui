@@ -6,6 +6,8 @@
 	
 	var EachNodeController = $.wiredui.EachNodeController = function EachNodeController(varCtx, parentController, remaining) {
 		this.initNode(varCtx);
+		this.parentController = parentController;
+		
 		var asPos = remaining.lastIndexOf(' as ');
 		this.arrVarName = trim(remaining.substr(0, asPos));
 		var varStr = trim(remaining.substr(asPos + 4));
