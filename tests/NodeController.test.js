@@ -60,7 +60,7 @@ test("ElseIf - Else syntax tree", function() {
 	
 	var ctrl = $.wiredui.buildController("<div1>{{if true}}<span>if</span>"
 		+ "{{elseif true}}<span>elseif${elif}</span>"
-		+ "{{else}}<span>else</span>{{/if}}</div1>");
+		+ "{{else}}<span>else</span>{{/if}}</div1>", $.observable({}));
 		
 	same(ctrl.childNodeControllers.length, 1);
 	
@@ -90,7 +90,7 @@ test("ElseIf - Else syntax tree", function() {
 
 test("Each syntax trees", function() {
 	var ctrl = $.wiredui.buildController("<div1>{{each arr as idx=>elem}}<span>${idx}</span>"
-		+ "<span>${elem}</span>{{/each}}</div1>");
+		+ "<span>${elem}</span>{{/each}}</div1>", $.observable({}));
 		
 	same(ctrl.childNodes.length, 1);
 	same(ctrl.childNodes[0].childNodes.length, 0);
@@ -117,15 +117,24 @@ test("NodeController.render()", function() {
 });
 
 test("OutputNodeController.render()", function() {
-	var ctrl = $.wiredui.buildController("<div>${xx}<span>${yy.aa}</span></div>", {
+	var data = $.observable({
 		xx: "xx",
 		yy: {
 			aa: "aa"
 		}
 	});
+	var ctrl = $.wiredui.buildController("<div>${xx}<span>${yy.aa}</span></div>", data);
 	
 	var DOM = ctrl.render();
 	console.log(DOM);
 	same(DOM[0].childNodes[0].nodeValue, "xx");
 	same(DOM[0].childNodes[1].childNodes[0].nodeValue, "aa");
+	
+	same(data().yy().aa.__observable.eventlisteners["change"].length, 1);
+	same(data().yy.__observable.eventlisteners["change"].length, 1);
+	data().yy().aa("newaa")
+	console.log(data().yy().aa.__observable)
+	
+	data().yy({aa : "aa in new yy"});
+	same(data().yy().aa.__observable.eventlisteners["change"].length, 1)
 });

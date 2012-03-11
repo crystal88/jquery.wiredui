@@ -4,6 +4,8 @@
 		this.parentController = parentController;
 		this.expr = new $.wiredui.Expression(token);
 		this.initNode(varCtx);
+		
+		this.setupListeners(this.expr.dependencies);
 	};
 	
 	OutputNodeController.prototype = new $.wiredui.NodeController();

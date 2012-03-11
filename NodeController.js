@@ -25,6 +25,35 @@
 		this.currentParent = this;
 	}
 	
+	NodeController.prototype.setupListeners = function(deps) {
+		var self = this;
+		var reRender = function() {console.log("reRender()")}
+		for (var i = 0; i < deps.length; ++i) {
+			var depChain = deps[i];
+			
+			var prevFn = function(){};
+			for (var j = depChain.length - 1; j >= 0; --j) {
+				var prevFnFn = prevFn;
+				var fn = (function(jj) {
+					
+					return function(data) {
+						if ( $.isFunction(data()[ depChain[jj] ] ) ) {
+							var subFn = function(newVal){
+								prevFnFn(newVal);
+								reRender()							
+							};
+							data()[ depChain[jj] ].on("change", subFn );
+							prevFnFn(data()[ depChain[jj] ] );
+						}
+					};
+					
+				})(j);
+				prevFn = fn;
+			}
+			prevFn(this.varCtx.data);
+		}
+	}
+	
 	NodeController.prototype.startElem = function(elem) {
 		++this.readDepth;
 		if (elem.nodeName === "#text") {
@@ -132,21 +161,21 @@
 		stmtParts = NodeController.stmtParts(str);
 		var stmtWord = stmtParts.stmtWord;
 		var remaining = stmtParts.remaining;
-		var varCtx = this.varCtx.copy();
+		var varCtx = this.varCtx;
 		switch( stmtWord ) {
 			case 'if':
-				rval = new $.wiredui.IfNodeController(varCtx, this, remaining);
+				rval = new $.wiredui.IfNodeController(this.varCtx, this, remaining);
 				break;
 			case 'elseif':
 			case 'elif':
 			case 'elsif':
-				rval = new $.wiredui.ElseIfNodeController(varCtx, this, remaining);
+				rval = new $.wiredui.ElseIfNodeController(this.varCtx, this, remaining);
 				break;
 			case 'else':
-				rval = new $.wiredui.ElseNodeController(varCtx, this, remaining);
+				rval = new $.wiredui.ElseNodeController(this.varCtx, this, remaining);
 				break;
 			case 'each':
-				rval = new $.wiredui.EachNodeController(varCtx, this, remaining);
+				rval = new $.wiredui.EachNodeController(this.varCtx, this, remaining);
 				break;
 			default:
 				throw "invalid statement tag '" + str + "'";
