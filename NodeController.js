@@ -28,7 +28,7 @@
 	NodeController.prototype.setupListeners = function(deps) {
 		var self = this;
 		var reRender = function() {
-			self.parentController.update(this);
+			self.parentController.update(self);
 		}
 		for (var i = 0; i < deps.length; ++i) {
 			var depChain = deps[i];
@@ -204,6 +204,10 @@
 		}*/
 	}
 	
+	var appendAtPosition = function(parentNode, childNodes, idx) {
+		
+	}
+	
 	NodeController.prototype.render = function() {
 		// wrapping the result into a div
 		var rval = document.createElement("div");
@@ -221,7 +225,7 @@
 				nodeStack.appendChild(pos.parentElem.childNodes[i]);
 			}
 			
-			var ctrlDOM = ctrl.render();
+			var ctrlDOM = this.childNodeControllers[i].lastCreatedElems = ctrl.render();
 			for (j = 0; j < ctrlDOM.length; ++j) {
 				pos.parentElem.appendChild(ctrlDOM[j]);
 			}
@@ -234,7 +238,18 @@
 		return rval.childNodes;
 	}
 	
+	NodeController.prototype.getElemPositionByCtrl = function(ctrl) {
+		for (var i = 0; i < this.childNodeControllers.length; ++i) {
+			if (this.childNodeControllers[i].nodeController === ctrl) {
+				return this.childNodeControllers[i].position;
+			}
+		}
+		throw "childNodeController not found";
+	}
+	
 	NodeController.prototype.update = function(childCtrl) {
+		var pos = this.getElemPositionByCtrl(childCtrl);
+		console.log(pos.idx)
 		
 	}
 

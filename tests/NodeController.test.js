@@ -133,7 +133,8 @@ test("OutputNodeController.render()", function() {
 	same(data().yy().aa.__observable.eventlisteners["change"].length, 1);
 	same(data().yy.__observable.eventlisteners["change"].length, 1);
 	data().yy().aa("newaa")
-	console.log(data().yy().aa.__observable)
+	
+	same(DOM[0].childNodes[1].childNodes[0].nodeValue, "newaa");
 	
 	data().yy({aa : "aa in new yy"});
 	same(data().yy().aa.__observable.eventlisteners["change"].length, 1)
