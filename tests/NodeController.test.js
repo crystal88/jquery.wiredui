@@ -134,8 +134,19 @@ test("OutputNodeController.render()", function() {
 	same(data().yy.__observable.eventlisteners["change"].length, 1);
 	data().yy().aa("newaa")
 	
+	same(DOM[0].childNodes[1].childNodes.length, 1)
 	same(DOM[0].childNodes[1].childNodes[0].nodeValue, "newaa");
 	
 	data().yy({aa : "aa in new yy"});
 	same(data().yy().aa.__observable.eventlisteners["change"].length, 1)
+});
+
+test("Child NodeController DOM positioning", function() {
+	var data = $.observable({aa:"aa", bb:"bb", cc:"cc"});
+	var ctrl = $.wiredui.buildController("<div><span1/>${aa}<span2/>${bb}<span3/><span4/>${cc}</div>", data);
+	
+	ctrl.render();
+	same(ctrl.childNodes[0].childNodes[1].nodeValue, "aa")
+	same(ctrl.childNodes[0].childNodes[3].nodeValue, "bb")
+	same(ctrl.childNodes[0].childNodes[6].nodeValue, "cc")
 });

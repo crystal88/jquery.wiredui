@@ -196,7 +196,6 @@
 			throw "failed finishElem " + elem.nodeName + ": no opened elem";
 		
 		this.currentParent = this.parentStack.pop();
-		
 		/*if (this.parentStack.length == 0) {
 			this.iterator.listener = this.parentController;
 			console.log("setting listener to parentController:")
@@ -205,17 +204,19 @@
 	}
 	
 	var appendAtPosition = function(parentElem, childElems, idx) {
-		var nodeStack = document.createElement("div");
-		for(var j = idx; j < parentElem.childNodes.length; ++j) {
-			nodeStack.appendChild(parentElem.childNodes[j]);
+		var nodeStack = [];
+		while (idx < parentElem.childNodes.length) {
+			var remChild = parentElem.childNodes[idx];
+			nodeStack.push(remChild);
+			parentElem.removeChild( remChild );
 		}
-			
+		
 		for (j = 0; j < childElems.length; ++j) {
 			parentElem.appendChild(childElems[j]);
 		}
 			
-		for (j = 0; j < nodeStack.childNodes.length; ++j) {
-			parentElem.appendChild(nodeStack.childNodes[j]);
+		for (j = 0; j < nodeStack.length; ++j) {
+			parentElem.appendChild(nodeStack[j]);
 		}
 	}
 	
@@ -226,12 +227,21 @@
 			rval.appendChild(this.childNodes[i]);
 		}
 		var idxShift = 0;
-		for (i = 0; i < this.childNodeControllers.length; ++i) {
+		var prevParentElem = null;
+		for (var i = 0; i < this.childNodeControllers.length; ++i) {
 			var pos = this.childNodeControllers[i].position;
 			var ctrl = this.childNodeControllers[i].nodeController;
 			var ctrlDOM = this.childNodeControllers[i].lastCreatedElems = ctrl.render();
+			
+			if (prevParentElem !== pos.parentElem) {
+				idxShift = 0;
+			}
 			appendAtPosition(pos.parentElem, ctrlDOM, pos.idx + idxShift);
-			idxShift += ctrlDOM.length;
+			
+			if (prevParentElem === pos.parentElem || prevParentElem === null) {
+				idxShift += ctrlDOM.length;
+			}
+			prevParentElem = pos.parentElem;
 		}
 		return rval.childNodes;
 	}
@@ -252,7 +262,20 @@
 			elemTrash.appendChild( childNodeCtrl.lastCreatedElems[i] );
 		}
 		var ctrlDOM = childNodeCtrl.lastCreatedElems = childCtrl.render();
-		appendAtPosition(childNodeCtrl.position.parentElem, ctrlDOM, childNodeCtrl.position.idx);
+		
+		var idxShift = 0;
+		for (i = 0; i < this.childNodeControllers.length; ++i) {
+			if (this.childNodeControllers[i] === childNodeCtrl) {
+				break;
+			}
+			if (this.childNodeControllers[i].position.parentElem == childNodeCtrl.position.parentElem) {
+				idxShift += childNodeCtrl.lastCreatedElems.length;
+			}
+		}
+		
+		appendAtPosition(childNodeCtrl.position.parentElem
+			, ctrlDOM
+			, childNodeCtrl.position.idx + idxShift);
 	}
 
 })(jQuery);
