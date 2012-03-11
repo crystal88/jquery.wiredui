@@ -204,8 +204,19 @@
 		}*/
 	}
 	
-	var appendAtPosition = function(parentNode, childNodes, idx) {
-		
+	var appendAtPosition = function(parentElem, childElems, idx) {
+		var nodeStack = document.createElement("div");
+		for(var j = idx; j < parentElem.childNodes.length; ++j) {
+			nodeStack.appendChild(parentElem.childNodes[j]);
+		}
+			
+		for (j = 0; j < childElems.length; ++j) {
+			parentElem.appendChild(childElems[j]);
+		}
+			
+		for (j = 0; j < nodeStack.childNodes.length; ++j) {
+			parentElem.appendChild(nodeStack.childNodes[j]);
+		}
 	}
 	
 	NodeController.prototype.render = function() {
@@ -218,39 +229,30 @@
 		for (i = 0; i < this.childNodeControllers.length; ++i) {
 			var pos = this.childNodeControllers[i].position;
 			var ctrl = this.childNodeControllers[i].nodeController;
-			
-			var nodeStack = document.createElement("div");
-			
-			for(var j = pos.idx + idxShift; j < pos.parentElem.childNodes.length; ++j) {
-				nodeStack.appendChild(pos.parentElem.childNodes[i]);
-			}
-			
 			var ctrlDOM = this.childNodeControllers[i].lastCreatedElems = ctrl.render();
-			for (j = 0; j < ctrlDOM.length; ++j) {
-				pos.parentElem.appendChild(ctrlDOM[j]);
-			}
-			
-			for (j = 0; j < nodeStack.childNodes.length; ++j) {
-				pos.parentElem.appendChild(nodeStack.childNodes[j]);
-			}
-			idxShift += nodeStack.childNodes.length;
+			appendAtPosition(pos.parentElem, ctrlDOM, pos.idx + idxShift);
+			idxShift += ctrlDOM.length;
 		}
 		return rval.childNodes;
 	}
 	
-	NodeController.prototype.getElemPositionByCtrl = function(ctrl) {
+	NodeController.prototype.getChildNodeByCtrl = function(ctrl) {
 		for (var i = 0; i < this.childNodeControllers.length; ++i) {
 			if (this.childNodeControllers[i].nodeController === ctrl) {
-				return this.childNodeControllers[i].position;
+				return this.childNodeControllers[i];
 			}
 		}
 		throw "childNodeController not found";
 	}
 	
 	NodeController.prototype.update = function(childCtrl) {
-		var pos = this.getElemPositionByCtrl(childCtrl);
-		console.log(pos.idx)
-		
+		var childNodeCtrl = this.getChildNodeByCtrl(childCtrl);
+		var elemTrash = document.createElement("div");
+		for (var i = 0; i < childNodeCtrl.lastCreatedElems.length; ++i) {
+			elemTrash.appendChild( childNodeCtrl.lastCreatedElems[i] );
+		}
+		var ctrlDOM = childNodeCtrl.lastCreatedElems = childCtrl.render();
+		appendAtPosition(childNodeCtrl.position.parentElem, ctrlDOM, childNodeCtrl.position.idx);
 	}
 
 })(jQuery);
