@@ -3,8 +3,7 @@
 	var IfNodeController = $.wiredui.IfNodeController = function IfNodeController(varCtx, parentController, conditionStr) {
 		this.initNode(varCtx);
 		this.parentController = parentController;
-		this.conditionStr = conditionStr;
-
+		this.condExpr = new $.wiredui.Expression(conditionStr);
 		IfNodeController.lastCreatedIf = this;
 		
 		/** Array<$.wiredui.ElseIfController> */
@@ -12,6 +11,10 @@
 		
 		/** Array<$.wiredui.ElseController> */
 		this.elseNode = null;
+		
+		if (varCtx !== undefined) {
+			this.setupListeners(this.condExpr.dependencies);
+		}
 	}
 	
 	IfNodeController.lastCreatedIf = null;
@@ -61,5 +64,9 @@
 			return $.wiredui.NodeController.prototype.createStatementController.call(this, str);
 		}
 	};
+	
+	IfNodeController.prototype.render = function() {
+		return [document.createTextNode("if")]
+	}
 
 })(jQuery);

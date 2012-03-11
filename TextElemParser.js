@@ -121,7 +121,13 @@
 		var rval = "";
 		var token = null;
 		while( (token = this.read()) !== null) {
-			rval += token.token;
+			if (token.type == "output") {
+				rval += "${" + token.token + "}";
+			} else if (token.type == "stmt") {
+				rval += "{{" + token.token + "}}";
+			} else {
+				rval += token.token;
+			}
 		}
 		return rval;
 	}

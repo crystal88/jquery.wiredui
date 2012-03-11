@@ -1,4 +1,5 @@
 module("DOMIterator")
+/**/
 test("Iteration failing without listener", function() {
 	
 	var iterator = new $.wiredui.DOMIterator("<html></html>");
@@ -37,3 +38,4 @@ test("Iteration test", function() {
 });
 
 
+/**/

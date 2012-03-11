@@ -1,15 +1,16 @@
 function debug(str) {
 	console.log(str);
 }
-
+/**/
 test("trim test", function() {
 	same(new String(" a ").replace(/\s+$/, '').replace(/^\s+/, ''), "a")
 })
 
 
 
-module("statement tags");
 /**
+module("statement tags");
+
 test("output tag test", function() {
 	var data = $.observable({
 		name: 'bence',

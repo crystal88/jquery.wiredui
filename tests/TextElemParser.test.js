@@ -1,5 +1,5 @@
 module("TextNodeParser");
-
+/**/
 function tokens(str) {
 	var stream = new $.wiredui.TextElemParser(str);
 	return stream.readAll();
@@ -84,3 +84,4 @@ test("Statement token reading", function() {
 		token: 'aa'
 	}], "html > stmt > html > stmt");
 });
+/**/

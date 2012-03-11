@@ -47,7 +47,6 @@
 	}
 	
 	DOMIterator.prototype.pushTextNode = function(str) {
-		// console.log("pushing " + str)
 		if (typeof(str) == "string") {
 			str = document.createTextNode(str);
 		}

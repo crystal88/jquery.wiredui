@@ -83,7 +83,6 @@
 		var parser = this.parser = new $.wiredui.TextElemParser(str);
 		var token = null;
 		while ( (token = parser.read()) !== null) {
-			// console.log(token);
 			switch(token.type) {
 				case "output":
 					var childNodeCtrl = new $.wiredui.ChildNodeController();
@@ -160,7 +159,7 @@
 	
 	NodeController.prototype.createStatementController = function(str) {
 		var rval = null;
-		stmtParts = NodeController.stmtParts(str);
+		var stmtParts = NodeController.stmtParts(str);
 		var stmtWord = stmtParts.stmtWord;
 		var remaining = stmtParts.remaining;
 		var varCtx = this.varCtx;

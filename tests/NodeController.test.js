@@ -126,7 +126,6 @@ test("OutputNodeController.render()", function() {
 	var ctrl = $.wiredui.buildController("<div>${xx}<span>${yy.aa}</span></div>", data);
 	
 	var DOM = ctrl.render();
-	console.log(DOM);
 	same(DOM[0].childNodes[0].nodeValue, "xx");
 	same(DOM[0].childNodes[1].childNodes[0].nodeValue, "aa");
 	
@@ -142,7 +141,7 @@ test("OutputNodeController.render()", function() {
 });
 
 test("Child NodeController DOM positioning", function() {
-	var data = $.observable({aa:"aa", bb:"bb", cc:"cc"});
+	var data = $.observable({aa:"aa", bb:"bb", cc:"cc", dd:"dd"});
 	var ctrl = $.wiredui.buildController("<div><span1/>${aa}<span2/>${bb}<span3/><span4/>${cc}</div>", data);
 	
 	ctrl.render();
@@ -150,3 +149,4 @@ test("Child NodeController DOM positioning", function() {
 	same(ctrl.childNodes[0].childNodes[3].nodeValue, "bb")
 	same(ctrl.childNodes[0].childNodes[6].nodeValue, "cc")
 });
+/**/

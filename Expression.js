@@ -1,7 +1,7 @@
 (function($) {
 	
 	var trim = function(token) {
-		return token.replace(/\s+$/, '').replace(/^\s+/, '');
+		return new String(token).replace(/\s+$/, '').replace(/^\s+/, '');
 	}
 	
 	var Expression = $.wiredui.Expression = function( expr, dependencies ) {

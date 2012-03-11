@@ -1,5 +1,5 @@
 module("Expressions");
-
+/**/
 test("literals", function() {
 	var expr = new $.wiredui.Expression(" (null ) ");
 	same(null, expr.evaluate(), "null works");
@@ -74,3 +74,4 @@ test("binary expressions", function() {
 	}, 4);
 	testBinExpr("not false and not false", data, true);
 });
+/**/
