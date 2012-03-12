@@ -66,7 +66,10 @@
 	};
 	
 	IfNodeController.prototype.render = function() {
-		return [document.createTextNode("if")]
+		if ( this.condExpr.evaluate(this.varCtx.data)() ) {
+			return this.renderBlock();
+		}
+		return this.elseNode.renderBlock();
 	}
 
 })(jQuery);

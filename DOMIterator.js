@@ -33,10 +33,11 @@
 
 			this.listener.startElem(childNode);
 			
-			if (this.pushedNode !== null) {
-				this.listener.startElem(this.pushedNode);
-				this.listener.finishElem(this.pushedNode);
+			while (this.pushedNode !== null) {
+				var tmp = this.pushedNode;
 				this.pushedNode = null;
+				this.listener.startElem(tmp);
+				this.listener.finishElem(tmp);
 			}
 			
 			this.read(childNode);

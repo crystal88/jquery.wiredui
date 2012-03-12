@@ -202,7 +202,7 @@
 		}*/
 	}
 	
-	var appendAtPosition = function(parentElem, childElems, idx) {
+	var appendAtPosition = function appendAtPosition(parentElem, childElems, idx) {
 		var nodeStack = [];
 		while (idx < parentElem.childNodes.length) {
 			var remChild = parentElem.childNodes[idx];
@@ -219,19 +219,13 @@
 		}
 	}
 	
-	NodeController.prototype.render = function() {
-		// wrapping the result into a div
-		var rval = document.createElement("div");
-		for(var i = 0; i < this.childNodes.length; ++i) {
-			rval.appendChild(this.childNodes[i]);
-		}
+	NodeController.prototype.renderBlock = function() {
 		var idxShift = 0;
 		var prevParentElem = null;
 		for (var i = 0; i < this.childNodeControllers.length; ++i) {
 			var pos = this.childNodeControllers[i].position;
 			var ctrl = this.childNodeControllers[i].nodeController;
 			var ctrlDOM = this.childNodeControllers[i].lastCreatedElems = ctrl.render();
-			
 			if (prevParentElem !== pos.parentElem) {
 				idxShift = 0;
 			}
@@ -242,7 +236,11 @@
 			}
 			prevParentElem = pos.parentElem;
 		}
-		return rval.childNodes;
+		return this.childNodes;
+	}
+	
+	NodeController.prototype.render = function() {
+		return this.renderBlock();
 	}
 	
 	NodeController.prototype.getChildNodeByCtrl = function(ctrl) {
@@ -271,7 +269,6 @@
 				idxShift += childNodeCtrl.lastCreatedElems.length;
 			}
 		}
-		
 		appendAtPosition(childNodeCtrl.position.parentElem
 			, ctrlDOM
 			, childNodeCtrl.position.idx + idxShift);
