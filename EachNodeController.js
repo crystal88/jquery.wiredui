@@ -23,7 +23,7 @@
 	EachNodeController.prototype = new $.wiredui.NodeController();
 	
 	/**
-	 * If encounters a /if node then assigns the parent controller to the
+	 * If encounters a /each node then assigns the parent controller to the
 	 * iterator listener and returns the parent controller.
 	 * 
 	 * Otherwise calls NodeController.createStatementController()
@@ -39,5 +39,20 @@
 			return $.wiredui.NodeController.prototype.createStatementController.call(this, str);
 		}
 	};
+	
+	EachNodeController.prototype.render = function() {
+		var rval = [];
+		var coll = this.varCtx.getValue(this.arrVarName)
+		while ( $.isFunction(coll) ) {
+			coll = coll();
+		}
+		for (var i in coll) {
+			var loopResult = this.renderBlock();
+			for (var i in loopResult) {
+				rval.push(loopResult[i].cloneNode());
+			}
+		}
+		return rval;
+	}
 	
 })(jQuery);
