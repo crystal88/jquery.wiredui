@@ -65,10 +65,25 @@
 		}
 	};
 	
+	IfNodeController.prototype.evalCond = function() {
+		var condVal = this.condExpr.evaluate(this.varCtx.data);
+		while ( $.isFunction(condVal) ) {
+			condVal = condVal();
+		}
+		return condVal;
+	}
+	
 	IfNodeController.prototype.render = function() {
-		if ( this.condExpr.evaluate(this.varCtx.data)() ) {
+		if ( this.evalCond() ) {
 			return this.renderBlock();
 		}
+		
+		for (var i = 0; i < this.elseIfNodes.length; ++i) {
+			var elseIfNode = this.elseIfNodes[i];
+			if ( elseIfNode.evalCond() )
+				return elseIfNode.renderBlock();
+		}
+		
 		return this.elseNode.renderBlock();
 	}
 
