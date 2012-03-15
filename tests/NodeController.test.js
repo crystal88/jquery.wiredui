@@ -129,15 +129,15 @@ test("OutputNodeController.render()", function() {
 	same(DOM[0].childNodes[0].nodeValue, "xx");
 	same(DOM[0].childNodes[1].childNodes[0].nodeValue, "aa");
 	
-	same(data().yy().aa.__observable.eventlisteners["change"].length, 1);
-	same(data().yy.__observable.eventlisteners["change"].length, 1);
+	same(data().yy().aa.listenerCount("change"), 1);
+	same(data().yy.listenerCount("change"), 1);
 	data().yy().aa("newaa")
 	
 	same(DOM[0].childNodes[1].childNodes.length, 1)
 	same(DOM[0].childNodes[1].childNodes[0].nodeValue, "newaa");
 	
 	data().yy({aa : "aa in new yy"});
-	same(data().yy().aa.__observable.eventlisteners["change"].length, 1)
+	same(data().yy().aa.listenerCount("change"), 1)
 });
 
 test("Child NodeController DOM positioning", function() {
