@@ -14,6 +14,8 @@
 		
 		this.childNodeControllers = [];
 		
+		this.listeners = [];
+		
 		this.readDepth = 0;
 		
 		/** $.wiredui.DOMIterator */
@@ -25,10 +27,13 @@
 		this.currentParent = this;
 	}
 	
-	NodeController.prototype.setupListeners = function(deps) {
+	NodeController.prototype.setupListeners = function(deps, runID) {
+		if (runID === undefined)
+			throw "missing runID - failed to set up event listeners";
+			
 		var self = this;
 		var reRender = function() {
-			self.parentController.update(self);
+			self.parentController.update(self, runID);
 		}
 		for (var i = 0; i < deps.length; ++i) {
 			var depChain = deps[i];
@@ -44,10 +49,18 @@
 						this.ranAlready = true;
 						
 						if ( $.isFunction(data()[ depChain[j] ] ) ) {
-							data()[ depChain[j] ].on("change", function(newVal){
+							var listenerID = data()[ depChain[j] ].on("change", function(newVal){
 								prevFn.ranAlready = false;
 								prevFn.call(prevFn, newVal);
 								reRender()							
+							});
+							if (self.listeners[runID] === undefined) {
+								self.listeners[runID] = [];
+							}
+							self.listeners[runID].push({
+								event: "change",
+								id: listenerID,
+								owner: data()[ depChain[j] ]
 							});
 							prevFn.call(prevFn, data()[ depChain[j] ] );
 						}
@@ -59,6 +72,19 @@
 			prevFn.call(prevFn, this.varCtx.data);
 		}
 	}
+	
+	NodeController.prototype.removeListeners = function(runID) {
+		if (undefined === runID)
+			throw "missing runID - failed removeListeners()";
+			
+		for (var i = 0; i < this.listeners[runID].length; ++i) {
+			var listener = this.listeners[runID][i];
+			listener.owner.off(listener.event, listener.id);
+		}
+		for (var i = 0; i < this.childNodeControllers.length; ++i) {
+			this.childNodeControllers[i].nodeController.removeListeners(runID);
+		}
+	};
 	
 	NodeController.prototype.startElem = function(elem) {
 		++this.readDepth;
@@ -237,13 +263,16 @@
 		}
 	}
 	
-	NodeController.prototype.renderBlock = function() {
+	NodeController.prototype.renderBlock = function(runID) {
+		if (runID === undefined)
+			throw "missing runID - failed renderBlock()";
+			
 		var idxShift = 0;
 		var prevParentElem = null;
 		for (var i = 0; i < this.childNodeControllers.length; ++i) {
 			var pos = this.childNodeControllers[i].position;
 			var ctrl = this.childNodeControllers[i].nodeController;
-			var ctrlDOM = this.childNodeControllers[i].lastCreatedElems = ctrl.render();
+			var ctrlDOM = this.childNodeControllers[i].lastCreatedElems = ctrl.render(runID);
 			if (prevParentElem !== pos.parentElem) {
 				idxShift = 0;
 			}
@@ -258,7 +287,7 @@
 	}
 	
 	NodeController.prototype.render = function() {
-		return this.renderBlock();
+		return this.renderBlock("");
 	}
 	
 	NodeController.prototype.getChildNodeByCtrl = function(ctrl) {
@@ -270,13 +299,17 @@
 		throw "childNodeController not found";
 	}
 	
-	NodeController.prototype.update = function(childCtrl) {
+	NodeController.prototype.update = function(childCtrl, runID) {
+		if (undefined === runID)
+			throw "missing runID - failed update()";
+			
 		var childNodeCtrl = this.getChildNodeByCtrl(childCtrl);
 		var elemTrash = document.createElement("div");
 		for (var i = 0; i < childNodeCtrl.lastCreatedElems.length; ++i) {
 			elemTrash.appendChild( childNodeCtrl.lastCreatedElems[i] );
 		}
-		var ctrlDOM = childNodeCtrl.lastCreatedElems = childCtrl.render();
+		childCtrl.removeListeners(runID);
+		var ctrlDOM = childNodeCtrl.lastCreatedElems = childCtrl.render(runID);
 		
 		var idxShift = 0;
 		for (i = 0; i < this.childNodeControllers.length; ++i) {

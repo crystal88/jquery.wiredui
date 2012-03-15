@@ -8,8 +8,8 @@
 	
 	OutputNodeController.prototype = new $.wiredui.NodeController();
 	
-	OutputNodeController.prototype.render = function() {
-		this.setupListeners(this.expr.dependencies);
+	OutputNodeController.prototype.render = function(runID) {
+		this.setupListeners(this.expr.dependencies, runID);
 		return [document.createTextNode( this.expr.evaluate(this.varCtx.data)() ) ];
 	}
 	

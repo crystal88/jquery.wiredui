@@ -40,7 +40,7 @@
 		}
 	};
 	
-	EachNodeController.prototype.render = function() {
+	EachNodeController.prototype.render = function(runID) {
 		var rval = [];
 		var coll = this.varCtx.getValue(this.arrVarName)
 		while ( $.isFunction(coll) ) {
@@ -51,14 +51,17 @@
 			var ctxIdxVar = this.varCtx.data()[this.idxVarName];
 			this.varCtx.data()[this.idxVarName] = $.observable(null);
 		}
+		var childRunCtr = 0;
 		for (var i in coll) {
 			if (this.idxVarName !== null) {
 				this.varCtx.data()[this.idxVarName](i);
 			}
-			var loopResult = this.renderBlock();
+			var childRunID = ( (tmpArr = runID.split(";")).push(childRunCtr), tmpArr ).join(";");
+			var loopResult = this.renderBlock(runID);
 			for (var i in loopResult) {
 				rval.push(loopResult[i].cloneNode());
 			}
+			++childRunCtr;
 		}
 		return rval;
 	}

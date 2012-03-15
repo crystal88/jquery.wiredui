@@ -69,19 +69,22 @@
 		return condVal;
 	}
 	
-	IfNodeController.prototype.render = function() {
-		this.setupListeners(this.condExpr.dependencies);
+	IfNodeController.prototype.render = function(runID) {
+		if (runID === undefined)
+			throw "missing runID - failed render()";
+			
+		this.setupListeners(this.condExpr.dependencies, runID);
 		if ( this.evalCond() ) {
-			return this.renderBlock();
+			return this.renderBlock(runID);
 		}
 		
 		for (var i = 0; i < this.elseIfNodes.length; ++i) {
 			var elseIfNode = this.elseIfNodes[i];
 			if ( elseIfNode.evalCond() )
-				return elseIfNode.renderBlock();
+				return elseIfNode.renderBlock(runID);
 		}
 		
-		return this.elseNode.renderBlock();
+		return this.elseNode.renderBlock(runID);
 	}
 
 })(jQuery);

@@ -140,6 +140,13 @@ test("OutputNodeController.render()", function() {
 	same(data().yy().aa.listenerCount("change"), 1)
 });
 
+test("NodeController.removeListener()", function() {
+	var data = $.observable( {a: "a", b: "b"} );
+	
+	var listenerID1 = data().a.on("change", function() {});
+	// TODO
+});
+
 test("Child NodeController DOM positioning", function() {
 	var data = $.observable({aa:"aa", bb:"bb", cc:"cc", dd:"dd"});
 	var ctrl = $.wiredui.buildController("<div><span1/>${aa}<span2/>${bb}<span3/><span4/>${cc}</div>", data);
