@@ -79,6 +79,20 @@
 		this.childNodes.push(child);
 	};
 	
+	NodeController.prototype.removeChild = function(child) {
+		var idx = null;
+		for (var i = 0; i < this.childNodes.length; ++i) {
+			if (this.childNodes[i] == child) {
+				idx = i;
+				break;
+			}
+		}
+		if (null === idx)
+			throw "failed to remove childNode";
+			
+		this.childNodes.splice(idx, 1);
+	}
+	
 	NodeController.prototype.readTextElem = function(str) {
 		var parser = this.parser = new $.wiredui.TextElemParser(str);
 		var token = null;
@@ -207,7 +221,9 @@
 		while (idx < parentElem.childNodes.length) {
 			var remChild = parentElem.childNodes[idx];
 			nodeStack.push(remChild);
+			console.log("removeChild() comes");
 			parentElem.removeChild( remChild );
+			console.log("removeChild() goes");
 		}
 		
 		for (j = 0; j < childElems.length; ++j) {

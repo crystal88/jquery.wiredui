@@ -15,3 +15,16 @@ test("Basic each", function() {
 	same(ctrl.childNodes[0].childNodes[1].nodeValue, "user");
 	
 });
+
+test("each - index variable", function() {
+	var data = $.observable({
+		users: [
+			{name: "user1", email: "user1@example.org"},
+			{name: "user2", email: "user2@example.org"}
+		]
+	});
+	var ctrl = $.wiredui.buildController("<ul>{{each users as idx => user}}${idx}. user{{/each}}</ul>", data);
+	var DOM = ctrl.render();
+	console.log(DOM);
+	
+});

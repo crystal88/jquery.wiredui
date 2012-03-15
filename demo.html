@@ -6,12 +6,24 @@
 		<h1>jquery.boundform demo</h1>
 		
 		<div id="form">
-			<input type="text" bind="${user.name}"/>
+			<input type="text" data-bind="${user.name}"/>
 			<ul>
 				{{foreach user.emails email}}
 					<li class="email"> ${email} </li>
 				{{/foreach}}
 			</ul>
 		</div>
+		
+		<table>
+			{{each users as idx => user}}
+				<td>
+					${user.name}
+					{{if user.showEmail}}
+						<i>${user.email}</i>
+					{{/if}}
+				</td>
+			{{/each}}
+		</table>
+		
 	</body>
 </html>

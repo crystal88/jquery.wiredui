@@ -46,7 +46,15 @@
 		while ( $.isFunction(coll) ) {
 			coll = coll();
 		}
+		if (this.idxVarName !== undefined) {
+			var ctxHasIdxVar = $.isFunction(this.varCtx.data()[this.idxVarName])
+			var ctxIdxVar = this.varCtx.data()[this.idxVarName];
+			this.varCtx.data()[this.idxVarName] = $.observable(null);
+		}
 		for (var i in coll) {
+			if (this.idxVarName !== null) {
+				this.varCtx.data()[this.idxVarName](i);
+			}
 			var loopResult = this.renderBlock();
 			for (var i in loopResult) {
 				rval.push(loopResult[i].cloneNode());
