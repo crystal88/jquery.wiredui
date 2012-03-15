@@ -35,24 +35,28 @@
 			
 			var prevFn = function(){};
 			for (var j = depChain.length - 1; j >= 0; --j) {
-				var prevFnFn = prevFn;
-				var fn = (function(jj) {
+				var fn = (function(j, prevFn) {
 					
 					return function(data) {
-						if ( $.isFunction(data()[ depChain[jj] ] ) ) {
-							var subFn = function(newVal){
-								prevFnFn(newVal);
+						if (this.ranAlready)
+							return;
+							
+						this.ranAlready = true;
+						
+						if ( $.isFunction(data()[ depChain[j] ] ) ) {
+							data()[ depChain[j] ].on("change", function(newVal){
+								prevFn.ranAlready = false;
+								prevFn.call(prevFn, newVal);
 								reRender()							
-							};
-							data()[ depChain[jj] ].on("change", subFn );
-							prevFnFn(data()[ depChain[jj] ] );
+							});
+							prevFn.call(prevFn, data()[ depChain[j] ] );
 						}
 					};
 					
-				})(j);
+				})(j, prevFn);
 				prevFn = fn;
 			}
-			prevFn(this.varCtx.data);
+			prevFn.call(prevFn, this.varCtx.data);
 		}
 	}
 	
@@ -221,9 +225,7 @@
 		while (idx < parentElem.childNodes.length) {
 			var remChild = parentElem.childNodes[idx];
 			nodeStack.push(remChild);
-			console.log("removeChild() comes");
 			parentElem.removeChild( remChild );
-			console.log("removeChild() goes");
 		}
 		
 		for (j = 0; j < childElems.length; ++j) {

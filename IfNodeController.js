@@ -11,10 +11,6 @@
 		
 		/** Array<$.wiredui.ElseController> */
 		this.elseNode = null;
-		
-		if (varCtx !== undefined) {
-			this.setupListeners(this.condExpr.dependencies);
-		}
 	}
 	
 	IfNodeController.lastCreatedIf = null;
@@ -74,6 +70,7 @@
 	}
 	
 	IfNodeController.prototype.render = function() {
+		this.setupListeners(this.condExpr.dependencies);
 		if ( this.evalCond() ) {
 			return this.renderBlock();
 		}

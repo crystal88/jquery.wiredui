@@ -1,5 +1,5 @@
 module("IfNodeController tests");
-
+/**/
 test("basic if", function() {
 	var data = $.observable({
 		a: true
@@ -16,7 +16,7 @@ test("basic if", function() {
 	
 });
 
-
+/**/
 test("if-elseif-else", function() {
 	var data = $.observable({a: 1});
 	var ctrl = $.wiredui.buildController("<div>{{if a == 1}}one"
@@ -34,3 +34,4 @@ test("if-elseif-else", function() {
 	data().a(4);
 	same(ctrl.childNodes[0].childNodes[0].nodeValue, "who knows?");
 });
+/**/
