@@ -263,7 +263,7 @@
 		}
 		
 		var swallowCopyElem = function(elem) {
-			if ( elem.tagName == "#text" )
+			if ( elem.nodeName == "#text" )
 				return document.createTextNode(elem.nodeValue);
 			
 			var rval = document.createElement(elem.tagName);
@@ -283,12 +283,12 @@
 				var elem = childNodes[i];
 				var newElem = swallowCopyElem( elem );
 				var newChildNodes = traverse.call( this, elem.childNodes );
-				for (var i = 0; i < newChildNodes.length; ++i) {
-					newElem.appendChild(newChildNodes[i]);
+				for (var j = 0; i < newChildNodes.length; ++j) {
+					newElem.appendChild(newChildNodes[j]);
 				}
-				for (var i = 0; i < this.childNodeControllers.length; ++i) {
-					if (this.childNodeControllers[i].position.parentElem === elem) {
-						this.childNodeControllers[i].lastCreatedElems[runID].parentElem = newElem;
+				for (j = 0; j < this.childNodeControllers.length; ++j) {
+					if (this.childNodeControllers[j].position.parentElem === elem) {
+						this.childNodeControllers[j].lastCreatedElems[runID].parentElem = newElem;
 						break;
 					}
 				}
@@ -320,11 +320,14 @@
 		if (runID === undefined)
 			throw "missing runID - failed renderBlock()";
 			
+		this.prepareRunID(runID);
+			
 		var idxShift = 0;
 		var prevParentElem = null;
 		for (var i = 0; i < this.childNodeControllers.length; ++i) {
 			var pos = this.childNodeControllers[i].position;
 			var ctrl = this.childNodeControllers[i].nodeController;
+			//console.log("itt"); ctrl.render(runID); return;
 			var ctrlDOM = this.childNodeControllers[i].lastCreatedElems[runID].elems = ctrl.render(runID);
 			if (prevParentElem !== pos.parentElem) {
 				idxShift = 0;

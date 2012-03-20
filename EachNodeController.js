@@ -53,16 +53,17 @@
 		}
 		var childRunCtr = 0;
 		for (var i in coll) {
-			if (this.idxVarName !== null) {
+			if (this.idxVarName !== undefined) {
 				this.varCtx.data()[this.idxVarName](i);
 			}
 			var childRunID = ( (tmpArr = runID.split(";")).push(childRunCtr), tmpArr ).join(";");
 			var loopResult = this.renderBlock(runID);
-			for (var i in loopResult) {
-				rval.push(loopResult[i].cloneNode());
+			for (var j = 0; j < loopResult.length; ++j) {
+				rval.push(loopResult[j].cloneNode());
 			}
 			++childRunCtr;
 		}
+		console.log("dehát ez lefutott baszki");
 		return rval;
 	}
 	

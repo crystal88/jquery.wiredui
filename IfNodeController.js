@@ -71,10 +71,10 @@
 	IfNodeController.prototype.render = function(runID) {
 		if (runID === undefined)
 			throw "missing runID - failed render()";
-			
-		this.setupListeners(this.condExpr.dependencies, runID);
-		if ( this.evalCond() ) {
-			return this.renderBlock(runID);
+			 
+		this.setupListeners(this.condExpr.dependencies, runID); 
+		if ( this.evalCond() ) { 
+			return this.renderBlock(runID); 
 		}
 		
 		for (var i = 0; i < this.elseIfNodes.length; ++i) {
