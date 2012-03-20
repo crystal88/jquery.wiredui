@@ -254,6 +254,51 @@
 		}*/
 	}
 	
+	NodeController.prototype.prepareRunID = function(runID) {
+		for (var i = 0; i < this.childNodeControllers.length; ++i) {
+			this.childNodeControllers[i].lastCreatedElems[runID] = {
+				parentElem: null,
+				elems: []
+			};
+		}
+		
+		var swallowCopyElem = function(elem) {
+			if ( elem.tagName == "#text" )
+				return document.createTextNode(elem.nodeValue);
+			
+			var rval = document.createElement(elem.tagName);
+			
+			for (var i = 0; i < elem.attributes.length; ++i) {
+				var attr = elem.attributes[i];
+				var newAttr = document.createAttribute(attr.name);
+				newAttr.value = attr.value;
+				rval.setAttribute(newAttr.name, newAttr);
+			}
+			return rval;
+		};
+		
+		var traverse = function(childNodes) {
+			var rval = [];
+			for (var i = 0; i < childNodes.length; ++i) {
+				var elem = childNodes[i];
+				var newElem = swallowCopyElem( elem );
+				var newChildNodes = traverse.call( this, elem.childNodes );
+				for (var i = 0; i < newChildNodes.length; ++i) {
+					newElem.appendChild(newChildNodes[i]);
+				}
+				for (var i = 0; i < this.childNodeControllers.length; ++i) {
+					if (this.childNodeControllers[i].position.parentElem === elem) {
+						this.childNodeControllers[i].lastCreatedElems[runID].parentElem = newElem;
+						break;
+					}
+				}
+				rval.push(newElem);
+			}
+			return rval;
+		}
+		return traverse.call( this, this.childNodes );
+	}
+	
 	var appendAtPosition = function appendAtPosition(parentElem, childElems, idx) {
 		var nodeStack = [];
 		while (idx < parentElem.childNodes.length) {
@@ -280,7 +325,7 @@
 		for (var i = 0; i < this.childNodeControllers.length; ++i) {
 			var pos = this.childNodeControllers[i].position;
 			var ctrl = this.childNodeControllers[i].nodeController;
-			var ctrlDOM = this.childNodeControllers[i].lastCreatedElems = ctrl.render(runID);
+			var ctrlDOM = this.childNodeControllers[i].lastCreatedElems[runID].elems = ctrl.render(runID);
 			if (prevParentElem !== pos.parentElem) {
 				idxShift = 0;
 			}
@@ -313,11 +358,11 @@
 			
 		var childNodeCtrl = this.getChildNodeByCtrl(childCtrl);
 		var elemTrash = document.createElement("div");
-		for (var i = 0; i < childNodeCtrl.lastCreatedElems.length; ++i) {
-			elemTrash.appendChild( childNodeCtrl.lastCreatedElems[i] );
+		for (var i = 0; i < childNodeCtrl.lastCreatedElems[runID].elems.length; ++i) {
+			elemTrash.appendChild( childNodeCtrl.lastCreatedElems[runID].elems[i] );
 		}
 		childCtrl.removeListeners(runID);
-		var ctrlDOM = childNodeCtrl.lastCreatedElems = childCtrl.render(runID);
+		var ctrlDOM = childNodeCtrl.lastCreatedElems[runID].elems = childCtrl.render(runID);
 		
 		var idxShift = 0;
 		for (i = 0; i < this.childNodeControllers.length; ++i) {
@@ -325,7 +370,7 @@
 				break;
 			}
 			if (this.childNodeControllers[i].position.parentElem == childNodeCtrl.position.parentElem) {
-				idxShift += childNodeCtrl.lastCreatedElems.length;
+				idxShift += childNodeCtrl.lastCreatedElems[runID].elems.length;
 			}
 		}
 		appendAtPosition(childNodeCtrl.position.parentElem

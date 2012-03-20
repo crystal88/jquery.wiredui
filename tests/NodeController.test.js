@@ -140,6 +140,15 @@ test("OutputNodeController.render()", function() {
 	same(data().yy().aa.listenerCount("change"), 1)
 });
 
+test("NodeController.prepareRunID()", function() {
+	var ctrl = $.wiredui.buildController("<ul>{{each users as user}}<li>${user.name}{{if user.showEmail}} <i>(${user.email})</i>{{/if}}</li>{{/each}}</ul>", $.observable({users: []}));
+	var rootNodes = ctrl.prepareRunID("test");
+	
+	same(rootNodes.length, 1);
+	same(rootNodes[0].nodeName, "UL");
+	same(ctrl.childNodeControllers[0].lastCreatedElems["test"].parentElem, rootNodes[0]);
+});
+
 test("NodeController.removeListener()", function() {
 	var data = $.observable( {a: "a", b: "b"} );
 	
