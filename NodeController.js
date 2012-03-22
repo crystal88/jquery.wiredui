@@ -266,7 +266,7 @@
 			if ( elem.nodeName == "#text" )
 				return document.createTextNode(elem.nodeValue);
 			
-			var rval = document.createElement(elem.tagName);
+			var rval = document.createElement(elem.nodeName);
 			
 			for (var i = 0; i < elem.attributes.length; ++i) {
 				var attr = elem.attributes[i];
@@ -283,7 +283,7 @@
 				var elem = childNodes[i];
 				var newElem = swallowCopyElem( elem );
 				var newChildNodes = traverse.call( this, elem.childNodes );
-				for (var j = 0; i < newChildNodes.length; ++j) {
+				for (var j = 0; j < newChildNodes.length; ++j) {
 					newElem.appendChild(newChildNodes[j]);
 				}
 				for (j = 0; j < this.childNodeControllers.length; ++j) {

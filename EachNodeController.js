@@ -63,7 +63,6 @@
 			}
 			++childRunCtr;
 		}
-		console.log("dehát ez lefutott baszki");
 		return rval;
 	}
 	
