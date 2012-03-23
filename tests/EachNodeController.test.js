@@ -34,3 +34,23 @@ test("each - index variable", function() {
 	same(DOM[0].childNodes[1].childNodes[0].nodeValue, "2");
 });
 /**/
+test("each - idx and val", function() {
+	var data = $.observable({
+		users: [
+			{name: "user1", email: "user1@example.org", showEmail: false},
+			{name: "user2", email: "user2@example.org", showEmail: true}
+		]
+	});
+	var ctrl = $.wiredui.buildController("<ul>{{each users as idx => user}}<li>${idx + 1}. user:\
+				${user.name} </li>{{/each}}</ul>", data);
+	var DOM = ctrl.render();
+	
+	same(DOM[0].childNodes.length, 2);
+	same(DOM[0].childNodes[0].childNodes.length, 4);
+	same(DOM[0].childNodes[0].childNodes[0].nodeValue, "1");
+	same(DOM[0].childNodes[0].childNodes[2].nodeValue, "user1");
+	
+	same(DOM[0].childNodes[1].childNodes.length, 4);
+	same(DOM[0].childNodes[1].childNodes[0].nodeValue, "2");
+	same(DOM[0].childNodes[1].childNodes[2].nodeValue, "user2");
+});

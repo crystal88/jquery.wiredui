@@ -102,7 +102,7 @@ test("Each syntax trees", function() {
 	
 	same(eachCtrl.arrVarName, "arr");
 	same(eachCtrl.idxVarName, "idx");
-	same(eachCtrl.elemVarName, "elem");
+	same(eachCtrl.valVarName, "elem");
 	
 });
 

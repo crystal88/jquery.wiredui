@@ -13,10 +13,10 @@
 		var varStr = trim(remaining.substr(asPos + 4));
 		var arrowPos = varStr.indexOf('=>');
 		if (-1 == arrowPos) {
-			this.elemVarName = varStr;
+			this.valVarName = varStr;
 		} else {
 			this.idxVarName = trim(varStr.substr(0, arrowPos));
-			this.elemVarName = trim(varStr.substr(arrowPos + 2));
+			this.valVarName = trim(varStr.substr(arrowPos + 2));
 		}
 	};
 	
@@ -69,11 +69,11 @@
 		}
 		if ( $.isArray(coll) ) {
 			for (var i = 0; i < coll.length; ++i) {
-				loopBody(i, null);
+				loopBody(i, coll[i]);
 			}
 		} else {
 			for (var i in coll) {
-				loopBody(i, null);
+				loopBody(i, coll[i]);
 			}
 		}
 		return rval;
