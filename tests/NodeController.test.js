@@ -160,9 +160,9 @@ test("Child NodeController DOM positioning", function() {
 	var data = $.observable({aa:"aa", bb:"bb", cc:"cc", dd:"dd"});
 	var ctrl = $.wiredui.buildController("<div><span1/>${aa}<span2/>${bb}<span3/><span4/>${cc}</div>", data);
 	
-	ctrl.render();
-	same(ctrl.childNodes[0].childNodes[1].nodeValue, "aa")
-	same(ctrl.childNodes[0].childNodes[3].nodeValue, "bb")
-	same(ctrl.childNodes[0].childNodes[6].nodeValue, "cc")
+	var DOM = ctrl.render();
+	same(DOM[0].childNodes[1].nodeValue, "aa")
+	same(DOM[0].childNodes[3].nodeValue, "bb")
+	same(DOM[0].childNodes[6].nodeValue, "cc")
 });
 /**/

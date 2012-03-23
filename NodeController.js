@@ -282,15 +282,14 @@
 			for (var i = 0; i < childNodes.length; ++i) {
 				var elem = childNodes[i];
 				var newElem = swallowCopyElem( elem );
-				var newChildNodes = traverse.call( this, elem.childNodes );
-				for (var j = 0; j < newChildNodes.length; ++j) {
-					newElem.appendChild(newChildNodes[j]);
-				}
 				for (j = 0; j < this.childNodeControllers.length; ++j) {
 					if (this.childNodeControllers[j].position.parentElem === elem) {
 						this.childNodeControllers[j].lastCreatedElems[runID].parentElem = newElem;
-						break;
 					}
+				}
+				var newChildNodes = traverse.call( this, elem.childNodes );
+				for (var j = 0; j < newChildNodes.length; ++j) {
+					newElem.appendChild(newChildNodes[j]);
 				}
 				rval.push(newElem);
 			}
