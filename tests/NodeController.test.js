@@ -100,7 +100,7 @@ test("Each syntax trees", function() {
 	var eachCtrl = ctrl.childNodeControllers[0].nodeController;
 	ok(eachCtrl instanceof $.wiredui.EachNodeController);
 	
-	same(eachCtrl.arrVarName, "arr");
+	same(eachCtrl.collVarName, "arr");
 	same(eachCtrl.idxVarName, "idx");
 	same(eachCtrl.valVarName, "elem");
 	

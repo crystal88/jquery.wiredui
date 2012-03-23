@@ -9,7 +9,7 @@
 		this.parentController = parentController;
 		
 		var asPos = remaining.lastIndexOf(' as ');
-		this.arrVarName = trim(remaining.substr(0, asPos));
+		this.collVarName = trim(remaining.substr(0, asPos));
 		var varStr = trim(remaining.substr(asPos + 4));
 		var arrowPos = varStr.indexOf('=>');
 		if (-1 == arrowPos) {
@@ -42,7 +42,7 @@
 	
 	EachNodeController.prototype.render = function(runID) {
 		var rval = [];
-		var coll = this.varCtx.getValue(this.arrVarName)
+		var coll = this.varCtx.getValue(this.collVarName)
 		while ( $.isFunction(coll) ) {
 			coll = coll();
 		}
