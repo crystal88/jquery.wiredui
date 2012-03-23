@@ -83,7 +83,10 @@
 				return elseIfNode.renderBlock(runID);
 		}
 		
-		return this.elseNode.renderBlock(runID);
+		if (this.elseNode)
+			return this.elseNode.renderBlock(runID);
+			
+		return [];
 	}
 
 })(jQuery);
