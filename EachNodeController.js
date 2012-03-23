@@ -51,6 +51,15 @@
 			var ctxIdxVar = this.varCtx.data()[this.idxVarName];
 			this.varCtx.data()[this.idxVarName] = $.observable(null);
 		}
+		if ( ! this.valVarName)
+			throw "syntax error: {{each " + this.collVarName + " as "
+				+ (this.idxVarName ? this.idxVarName + " => " : "") + "}}";
+		
+		var ctxHasValVar = $.isFunction(this.varCtx.data()[ this.valVarName ]);
+		if ( ctxHasValVar ) {
+			var ctxValVar = this.varCtx.data()[ this.valVarName ];
+		}
+		
 		
 		var self = this;
 		var childRunCtr = 0;
@@ -60,6 +69,7 @@
 				self.varCtx.data()[self.idxVarName](i);
 				self.varCtx.data()[self.idxVarName].__observable.isIdxVar = true;
 			}
+			self.varCtx.data()[self.valVarName] = val;
 			var childRunID = ( (tmpArr = runID.split(";")).push(childRunCtr), tmpArr ).join(";");
 			var loopResult = self.renderBlock(runID);
 			for (var j = 0; j < loopResult.length; ++j) {
@@ -75,6 +85,13 @@
 			for (var i in coll) {
 				loopBody(i, coll[i]);
 			}
+		}
+		
+		if (ctxHasIdxVar) {
+			this.varCtx.data()[ this.idxVarName ] = ctxIdxVar;
+		}
+		if (ctxHasValVar) {
+			this.varCtx.data()[ this.valVarName ] = ctxValVar;
 		}
 		return rval;
 	}

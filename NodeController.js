@@ -33,7 +33,7 @@
 		var self = this;
 		var reRender = function() {
 			self.parentController.update(self, runID);
-		}
+		};
 		for (var i = 0; i < deps.length; ++i) {
 			var depChain = deps[i];
 			
@@ -47,7 +47,8 @@
 							
 						this.ranAlready = true;
 						
-						if ( $.isFunction(data()[ depChain[j] ] ) && data()[ depChain[j] ].__observable
+						if ( $.isFunction(data()[ depChain[j] ] )
+								&& data()[ depChain[j] ].__observable
 								&& ! data()[ depChain[j] ].__observable.isIdxVar) {
 							var listenerID = data()[ depChain[j] ].on("change", function(newVal){
 								prevFn.ranAlready = false;
