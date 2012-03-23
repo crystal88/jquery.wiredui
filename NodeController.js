@@ -32,7 +32,7 @@
 			throw "missing runID - failed to set up event listeners";
 		var self = this;
 		var reRender = function() {
-			self.parentController.update(self, runID);
+			self.parentController.updateChild(self, runID);
 		};
 		for (var i = 0; i < deps.length; ++i) {
 			var depChain = deps[i];
@@ -362,9 +362,9 @@
 		throw "childNodeController not found";
 	}
 	
-	NodeController.prototype.update = function(childCtrl, runID) {
+	NodeController.prototype.updateChild = function(childCtrl, runID) {
 		if (undefined === runID)
-			throw "missing runID - failed update()";
+			throw "missing runID - failed updateChild()";
 			
 		var childNodeCtrl = this.getChildNodeByCtrl(childCtrl);
 		var elemTrash = document.createElement("div");
