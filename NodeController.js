@@ -30,7 +30,6 @@
 	NodeController.prototype.setupListeners = function(deps, runID) {
 		if (runID === undefined)
 			throw "missing runID - failed to set up event listeners";
-			
 		var self = this;
 		var reRender = function() {
 			self.parentController.update(self, runID);
@@ -48,7 +47,8 @@
 							
 						this.ranAlready = true;
 						
-						if ( $.isFunction(data()[ depChain[j] ] ) ) {
+						if ( $.isFunction(data()[ depChain[j] ] ) && data()[ depChain[j] ].__observable
+								&& ! data()[ depChain[j] ].__observable.isIdxVar) {
 							var listenerID = data()[ depChain[j] ].on("change", function(newVal){
 								prevFn.ranAlready = false;
 								prevFn.call(prevFn, newVal);
@@ -320,30 +320,35 @@
 		if (runID === undefined)
 			throw "missing runID - failed renderBlock()";
 			
-		this.prepareRunID(runID);
-			
+		var rval = this.prepareRunID(runID);
+		
 		var idxShift = 0;
 		var prevParentElem = null;
 		for (var i = 0; i < this.childNodeControllers.length; ++i) {
-			var pos = this.childNodeControllers[i].position;
+			var parentElem = this.childNodeControllers[i].lastCreatedElems[runID].parentElem;
+			if (null == parentElem)
+				throw "failed to init parentElem for childNodeController[ " + i + " ] in runID '" + runID + "'";
+				
+			var posIdx = this.childNodeControllers[i].position.idx;
 			var ctrl = this.childNodeControllers[i].nodeController;
 			//console.log("itt"); ctrl.render(runID); return;
 			var ctrlDOM = this.childNodeControllers[i].lastCreatedElems[runID].elems = ctrl.render(runID);
-			if (prevParentElem !== pos.parentElem) {
+			
+			if (prevParentElem !== parentElem) {
 				idxShift = 0;
 			}
-			appendAtPosition(pos.parentElem, ctrlDOM, pos.idx + idxShift);
+			appendAtPosition(parentElem, ctrlDOM, posIdx + idxShift);
 			
-			if (prevParentElem === pos.parentElem || prevParentElem === null) {
+			if (prevParentElem === parentElem || prevParentElem === null) {
 				idxShift += ctrlDOM.length;
 			}
-			prevParentElem = pos.parentElem;
+			prevParentElem = parentElem;
 		}
-		return this.childNodes;
+		return rval;
 	}
 	
 	NodeController.prototype.render = function() {
-		return this.renderBlock("");
+		return this.renderBlock("0");
 	}
 	
 	NodeController.prototype.getChildNodeByCtrl = function(ctrl) {
@@ -358,7 +363,7 @@
 	NodeController.prototype.update = function(childCtrl, runID) {
 		if (undefined === runID)
 			throw "missing runID - failed update()";
-			
+		
 		var childNodeCtrl = this.getChildNodeByCtrl(childCtrl);
 		var elemTrash = document.createElement("div");
 		for (var i = 0; i < childNodeCtrl.lastCreatedElems[runID].elems.length; ++i) {
@@ -376,7 +381,7 @@
 				idxShift += childNodeCtrl.lastCreatedElems[runID].elems.length;
 			}
 		}
-		appendAtPosition(childNodeCtrl.position.parentElem
+		appendAtPosition(childNodeCtrl.lastCreatedElems[runID].parentElem
 			, ctrlDOM
 			, childNodeCtrl.position.idx + idxShift);
 	}

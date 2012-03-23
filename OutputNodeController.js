@@ -10,7 +10,11 @@
 	
 	OutputNodeController.prototype.render = function(runID) {
 		this.setupListeners(this.expr.dependencies, runID);
-		return [document.createTextNode( this.expr.evaluate(this.varCtx.data)() ) ];
+		var rval = this.expr.evaluate(this.varCtx.data);
+		while ( $.isFunction(rval) ) {
+			rval = rval();
+		}
+		return [document.createTextNode( rval ) ];
 	}
 	
 	

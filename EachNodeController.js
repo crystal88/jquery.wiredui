@@ -51,17 +51,30 @@
 			var ctxIdxVar = this.varCtx.data()[this.idxVarName];
 			this.varCtx.data()[this.idxVarName] = $.observable(null);
 		}
+		
+		var self = this;
 		var childRunCtr = 0;
-		for (var i in coll) {
-			if (this.idxVarName !== undefined) {
-				this.varCtx.data()[this.idxVarName](i);
+		
+		var loopBody = function(idx, val) {
+			if (self.idxVarName !== undefined) {
+				self.varCtx.data()[self.idxVarName](i);
+				self.varCtx.data()[self.idxVarName].__observable.isIdxVar = true;
 			}
 			var childRunID = ( (tmpArr = runID.split(";")).push(childRunCtr), tmpArr ).join(";");
-			var loopResult = this.renderBlock(runID);
+			var loopResult = self.renderBlock(runID);
 			for (var j = 0; j < loopResult.length; ++j) {
-				rval.push(loopResult[j].cloneNode());
+				rval.push(loopResult[j]);
 			}
 			++childRunCtr;
+		}
+		if ( $.isArray(coll) ) {
+			for (var i = 0; i < coll.length; ++i) {
+				loopBody(i, null);
+			}
+		} else {
+			for (var i in coll) {
+				loopBody(i, null);
+			}
 		}
 		return rval;
 	}

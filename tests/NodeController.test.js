@@ -111,9 +111,9 @@ test("NodeController.render()", function() {
 		var DOM = ctrl.render();
 		
 		same(DOM.length, 1);
-		same(DOM[0].tagName, "div");
+		same(DOM[0].tagName, "DIV");
 		same(DOM[0].childNodes.length, 1);
-		same(DOM[0].childNodes[0].tagName, "span");
+		same(DOM[0].childNodes[0].tagName, "SPAN");
 });
 
 test("OutputNodeController.render()", function() {

@@ -1,5 +1,5 @@
 module("EachNodeController tests");
-/**
+/**/
 test("Basic each", function() {
 	var data = $.observable({
 		users: [
@@ -9,11 +9,10 @@ test("Basic each", function() {
 	});
 	var ctrl = $.wiredui.buildController("<ul>{{each users as idx => user}}user{{/each}}</ul>", data);
 	
-	ctrl.render();
-	
-	same(ctrl.childNodes[0].childNodes.length, 2);
-	same(ctrl.childNodes[0].childNodes[0].nodeValue, "user");
-	same(ctrl.childNodes[0].childNodes[1].nodeValue, "user");
+	var ctrlDOM = ctrl.render();
+	same(ctrlDOM[0].childNodes.length, 2);
+	same(ctrlDOM[0].childNodes[0].nodeValue, "user");
+	same(ctrlDOM[0].childNodes[1].nodeValue, "user");
 	
 });
 /**/
@@ -24,9 +23,14 @@ test("each - index variable", function() {
 			{name: "user2", email: "user2@example.org"}
 		]
 	});
-	var ctrl = $.wiredui.buildController("<ul>{{each users as idx => user}}${idx}. user{{/each}}</ul>", data);
+	var ctrl = $.wiredui.buildController("<ul>{{each users as idx => user}}<li>${idx + 1}. user</li>{{/each}}</ul>", data);
 	var DOM = ctrl.render();
-	console.log(DOM);
 	
+	same(DOM[0].childNodes.length, 2);
+	same(DOM[0].childNodes[0].childNodes.length, 2);
+	same(DOM[0].childNodes[0].childNodes[0].nodeValue, "1");
+	
+	same(DOM[0].childNodes[1].childNodes.length, 2);
+	same(DOM[0].childNodes[1].childNodes[0].nodeValue, "2");
 });
 /**/
