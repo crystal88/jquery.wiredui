@@ -77,10 +77,12 @@
 	NodeController.prototype.removeListeners = function(runID, cascade) {
 		if (undefined === runID)
 			throw "missing runID - failed removeListeners()";
-			
-		for (var i = 0; i < this.listeners[runID].length; ++i) {
-			var listener = this.listeners[runID][i];
-			listener.owner.off(listener.event, listener.id);
+		
+		if ( this.listeners[runID] !== undefined ) {
+			for (var i = 0; i < this.listeners[runID].length; ++i) {
+				var listener = this.listeners[runID][i];
+				listener.owner.off(listener.event, listener.id);
+			}
 		}
 		
 		if (undefined === cascade) {
@@ -363,7 +365,7 @@
 	NodeController.prototype.update = function(childCtrl, runID) {
 		if (undefined === runID)
 			throw "missing runID - failed update()";
-		
+			
 		var childNodeCtrl = this.getChildNodeByCtrl(childCtrl);
 		var elemTrash = document.createElement("div");
 		for (var i = 0; i < childNodeCtrl.lastCreatedElems[runID].elems.length; ++i) {

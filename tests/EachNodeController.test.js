@@ -52,7 +52,18 @@ test("each - idx and val", function() {
 	same(DOM[0].childNodes[0].childNodes[0].nodeValue, "1");
 	same(DOM[0].childNodes[0].childNodes[2].nodeValue, "user1");
 	
+	data().users(0)().showEmail(true);
+	same(DOM[0].childNodes[0].childNodes.length, 5);
+	
 	same(DOM[0].childNodes[1].childNodes.length, 5);
 	same(DOM[0].childNodes[1].childNodes[0].nodeValue, "2");
 	same(DOM[0].childNodes[1].childNodes[2].nodeValue, "user2");
+	same(DOM[0].childNodes[1].childNodes[4].childNodes[0].nodeValue, 'user2@example.org')
+	
+	data().users(1)().email('user2@example.com')
+	same(DOM[0].childNodes[1].childNodes[4].childNodes[0].nodeValue, 'user2@example.com')
+	
+	data().users(1)().showEmail(false);
+	console.log(DOM[0])
+	same(DOM[0].childNodes[0].childNodes.length, 4);
 });

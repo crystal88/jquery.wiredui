@@ -71,7 +71,7 @@
 			}
 			self.varCtx.data()[self.valVarName] = val;
 			var childRunID = ( (tmpArr = runID.split(";")).push(childRunCtr), tmpArr ).join(";");
-			var loopResult = self.renderBlock(runID);
+			var loopResult = self.renderBlock(childRunID);
 			for (var j = 0; j < loopResult.length; ++j) {
 				rval.push(loopResult[j]);
 			}
