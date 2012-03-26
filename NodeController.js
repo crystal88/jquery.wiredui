@@ -300,6 +300,12 @@
 			}
 			return rval;
 		}
+		
+		for (i = 0; i < this.childNodeControllers.length; ++i) {
+			if (this.childNodeControllers[i].lastCreatedElems[runID] == null) {
+				
+			}
+		}
 		return traverse.call( this, this.childNodes );
 	}
 	
@@ -356,8 +362,11 @@
 		var prevParentElem = null;
 		for (var i = 0; i < this.childNodeControllers.length; ++i) {
 			var parentElem = this.childNodeControllers[i].lastCreatedElems[runID].parentElem;
-			if (null == parentElem)
-				throw "failed to init parentElem for childNodeController[ " + i + " ] in runID '" + runID + "'";
+			if (null == parentElem) {
+				parentElem = rval;
+				console.log(parentElem);
+				// throw "failed to init parentElem for childNodeController[ " + i + " ] in runID '" + runID + "'";
+			}
 				
 			var posIdx = this.childNodeControllers[i].position.idx;
 			var ctrl = this.childNodeControllers[i].nodeController;

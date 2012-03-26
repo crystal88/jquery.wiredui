@@ -158,9 +158,10 @@ test("NodeController.removeListener()", function() {
 
 test("Child NodeController DOM positioning", function() {
 	var data = $.observable({aa:"aa", bb:"bb", cc:"cc", dd:"dd"});
-	var ctrl = $.wiredui.buildController("<div><span1/>${aa}<span2/>${bb}<span3/><span4/>${cc}</div>", data);
+	var ctrl = $.wiredui.buildController("<div><span1/>${aa}<span2/>${bb}<span3/><span4/>${cc}{{if true}} ${aa} {{/if}}</div>", data);
 	
 	var DOM = ctrl.render();
+	console.log(DOM)
 	same(DOM[0].childNodes[1].nodeValue, "aa")
 	same(DOM[0].childNodes[3].nodeValue, "bb")
 	same(DOM[0].childNodes[6].nodeValue, "cc")

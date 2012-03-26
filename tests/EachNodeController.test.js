@@ -66,7 +66,7 @@ test("each - idx and val", function() {
 	var iTag = DOM[0].childNodes[0].childNodes[4];
 	same(iTag.nodeName, "I");
 	same(iTag.childNodes[0].nodeValue, "user1@example.org")
-	console.log("------");
+
 	data().users(1)().email('user2@example.com')
 	same(DOM[0].childNodes[1].childNodes[4].childNodes[0].nodeValue, 'user2@example.com')
 	
