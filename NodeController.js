@@ -365,7 +365,7 @@
 	NodeController.prototype.updateChild = function(childCtrl, runID) {
 		if (undefined === runID)
 			throw "missing runID - failed updateChild()";
-			
+			console.log("updating", this, childCtrl, runID)
 		var childNodeCtrl = this.getChildNodeByCtrl(childCtrl);
 		var elemTrash = document.createElement("div");
 		for (var i = 0; i < childNodeCtrl.lastCreatedElems[runID].elems.length; ++i) {

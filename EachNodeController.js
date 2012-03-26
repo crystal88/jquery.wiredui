@@ -18,6 +18,7 @@
 			this.idxVarName = trim(varStr.substr(0, arrowPos));
 			this.valVarName = trim(varStr.substr(arrowPos + 2));
 		}
+		this.valValues = [];
 	};
 	
 	EachNodeController.prototype = new $.wiredui.NodeController();
@@ -63,8 +64,11 @@
 		
 		var self = this;
 		var childRunCtr = 0;
-		
+		this.valValues[runID] = [];
 		var loopBody = function(idx, val) {
+			self.valValues[runID][idx] = val;
+			console.log("setting self.valValues[" + runID + "][" + idx + "] = ", $.observable.remove(val));
+			console.log("storing self.valValues[" + idx + "] = ", $.observable.remove(val))
 			if (self.idxVarName !== undefined) {
 				self.varCtx.data()[self.idxVarName](i);
 				self.varCtx.data()[self.idxVarName].__observable.isIdxVar = true;
@@ -94,6 +98,15 @@
 			this.varCtx.data()[ this.valVarName ] = ctxValVar;
 		}
 		return rval;
+	}
+	
+	EachNodeController.prototype.updateChild = function(childCtrl, runID) {
+		var tmpArr = runID.split(";");
+		var selfRunID = tmpArr[tmpArr.length - 2];
+		var childRunID = tmpArr[tmpArr.length - 1];
+		this.varCtx.data()[ this.valVarName ] = this.valValues[selfRunID][childRunID];
+		console.log("setting " + this.valVarName + " to ", $.observable.remove(this.valValues[selfRunID][childRunID]))
+		$.wiredui.NodeController.prototype.updateChild.call(this, childCtrl, runID);
 	}
 	
 })(jQuery);
