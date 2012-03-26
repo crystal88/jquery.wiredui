@@ -10,6 +10,7 @@
 	
 	OutputNodeController.prototype.render = function(runID) {
 		this.setupListeners(this.expr.dependencies, runID);
+		this.saveLoopVariables(runID);
 		var rval = this.expr.evaluate(this.varCtx.data);
 		while ( $.isFunction(rval) ) {
 			rval = rval();

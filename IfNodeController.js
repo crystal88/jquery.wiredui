@@ -71,8 +71,9 @@
 	IfNodeController.prototype.render = function(runID) {
 		if (runID === undefined)
 			throw "missing runID - failed render()";
-			 
+
 		this.setupListeners(this.condExpr.dependencies, runID); 
+		this.saveLoopVariables(runID);
 		if ( this.evalCond() ) { 
 			return this.renderBlock(runID); 
 		}

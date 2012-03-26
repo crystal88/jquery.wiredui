@@ -25,11 +25,20 @@
 		this.parentStack = [ this ];
 		
 		this.currentParent = this;
+		
+		/**
+		 * loop var name => {runID => $.observable}
+		 */
+		this.loopVariables = {};
+		
+		this.dependencies = [];
 	}
 	
 	NodeController.prototype.setupListeners = function(deps, runID) {
 		if (runID === undefined)
 			throw "missing runID - failed to set up event listeners";
+			
+		this.dependencies = deps;
 		var self = this;
 		var reRender = function() {
 			self.parentController.updateChild(self, runID);
@@ -153,8 +162,6 @@
 				case "stmt":
 					var nodeController = this.createChildNodeController(token.token);
 					if (nodeController !== null) {
-						// console.log("switching listener at "+token.token);
-						// console.log(nodeController);
 						this.iterator.listener = nodeController;
 						this.iterator.pushTextNode(parser.getUnread());
 					}
@@ -250,11 +257,6 @@
 			throw "failed finishElem " + elem.nodeName + ": no opened elem";
 		
 		this.currentParent = this.parentStack.pop();
-		/*if (this.parentStack.length == 0) {
-			this.iterator.listener = this.parentController;
-			console.log("setting listener to parentController:")
-			console.log(this.parentController)
-		}*/
 	}
 	
 	NodeController.prototype.prepareRunID = function(runID) {
@@ -318,10 +320,36 @@
 		}
 	}
 	
+	NodeController.prototype.saveLoopVariables = function(runID) {
+		for (var i = 0; i < this.dependencies.length; ++i) {
+			var dep = this.dependencies[ i ];
+			if (dep.length > 0) {
+				var loopVarName = dep[ 0 ];
+				if (this.varCtx.data()[ loopVarName ] !== undefined) {
+					var wrappedLoopVar = this.varCtx.data()[ loopVarName ];
+					if (wrappedLoopVar.__observable.isValVar) {
+						if (this.loopVariables[ loopVarName ] === undefined) {
+							this.loopVariables[ loopVarName ] = {};
+						}
+						this.loopVariables[ loopVarName][ runID] = wrappedLoopVar;
+					}
+				}
+			}
+		}
+	}
+	
+	NodeController.prototype.loadLoopVariables = function(runID) {
+		for (var loopVarName in this.loopVariables) {
+			if (this.loopVariables[ loopVarName ][ runID ] !== undefined) {
+				this.varCtx.data()[ loopVarName ] = this.loopVariables[ loopVarName ][ runID ];
+			}
+		}
+	}
+	
 	NodeController.prototype.renderBlock = function(runID) {
 		if (runID === undefined)
 			throw "missing runID - failed renderBlock()";
-			
+		
 		var rval = this.prepareRunID(runID);
 		
 		var idxShift = 0;
@@ -333,7 +361,6 @@
 				
 			var posIdx = this.childNodeControllers[i].position.idx;
 			var ctrl = this.childNodeControllers[i].nodeController;
-			//console.log("itt"); ctrl.render(runID); return;
 			var ctrlDOM = this.childNodeControllers[i].lastCreatedElems[runID].elems = ctrl.render(runID);
 			
 			if (prevParentElem !== parentElem) {
@@ -365,13 +392,16 @@
 	NodeController.prototype.updateChild = function(childCtrl, runID) {
 		if (undefined === runID)
 			throw "missing runID - failed updateChild()";
-			console.log("updating", this, childCtrl, runID)
+			
 		var childNodeCtrl = this.getChildNodeByCtrl(childCtrl);
 		var elemTrash = document.createElement("div");
 		for (var i = 0; i < childNodeCtrl.lastCreatedElems[runID].elems.length; ++i) {
 			elemTrash.appendChild( childNodeCtrl.lastCreatedElems[runID].elems[i] );
 		}
 		childCtrl.removeListeners(runID);
+		
+		childCtrl.loadLoopVariables(runID);
+		
 		var ctrlDOM = childNodeCtrl.lastCreatedElems[runID].elems = childCtrl.render(runID);
 		
 		var idxShift = 0;
