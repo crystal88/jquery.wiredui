@@ -108,6 +108,10 @@
 	
 	NodeController.prototype.startElem = function(elem) {
 		++this.readDepth;
+		var x = this.parentStack.length;
+		var debugStr = ""
+		while (--x) debugStr += "  ";
+		// console.log(debugStr + "readElem " + elem.nodeName)
 		if (elem.nodeName === "#text") {
 			this.readTextElem(elem.nodeValue);
 		} else {
@@ -117,7 +121,7 @@
 			while (newElem.childNodes.length > 0) {
 				newElem.removeChild(newElem.childNodes[0]);
 			}
-			
+			// console.log(debugStr + "  attaching to ", this.currentParent.nodeName || this.currentParent)
 			this.currentParent.appendChild(newElem);
 			
 			this.parentStack.push(this.currentParent);
@@ -281,9 +285,8 @@
 			}
 			return rval;
 		};
-		
 		var traverse = function(childNodes) {
-			var rval = document.createElement("container");
+			var rval = document.createElement("cnt");
 			for (var i = 0; i < childNodes.length; ++i) {
 				var elem = childNodes[i];
 				var newElem = swallowCopyElem( elem );
@@ -293,19 +296,14 @@
 					}
 				}
 				var newChildNodes = traverse.call( this, elem.childNodes ).childNodes;
-				for (var j = 0; j < newChildNodes.length; ++j) {
-					newElem.appendChild(newChildNodes[j]);
+				while (newChildNodes.length) {
+					newElem.appendChild(newChildNodes[0]);
 				}
 				rval.appendChild(newElem);
 			}
 			return rval;
 		}
 		
-		for (i = 0; i < this.childNodeControllers.length; ++i) {
-			if (this.childNodeControllers[i].lastCreatedElems[runID] == null) {
-				
-			}
-		}
 		return traverse.call( this, this.childNodes );
 	}
 	
@@ -317,7 +315,8 @@
 			parentElem.removeChild( remChild );
 		}
 		
-		for (j = 0; j < childElems.length; ++j) {
+		
+		for (var j = 0; j < childElems.length; ++j) {
 			parentElem.appendChild(childElems[j]);
 		}
 			
@@ -355,23 +354,22 @@
 	NodeController.prototype.renderBlock = function(runID) {
 		if (runID === undefined)
 			throw "missing runID - failed renderBlock()";
-		
+
 		var rval = this.prepareRunID(runID);
-		
 		var idxShift = 0;
 		var prevParentElem = null;
 		for (var i = 0; i < this.childNodeControllers.length; ++i) {
 			var parentElem = this.childNodeControllers[i].lastCreatedElems[runID].parentElem;
 			if (null == parentElem) {
 				parentElem = rval;
-				console.log(parentElem);
-				// throw "failed to init parentElem for childNodeController[ " + i + " ] in runID '" + runID + "'";
 			}
 				
 			var posIdx = this.childNodeControllers[i].position.idx;
 			var ctrl = this.childNodeControllers[i].nodeController;
-			var ctrlDOM = this.childNodeControllers[i].lastCreatedElems[runID].elems = ctrl.render(runID);
-			
+			var ctrlDOM =  ctrl.render(runID);
+			var newElems = [];
+			for (var j = 0; j < ctrlDOM.length; ++j) newElems.push(ctrlDOM[j]);
+			this.childNodeControllers[i].lastCreatedElems[runID].elems = newElems;
 			if (prevParentElem !== parentElem) {
 				idxShift = 0;
 			}
@@ -401,7 +399,7 @@
 	NodeController.prototype.updateChild = function(childCtrl, runID) {
 		if (undefined === runID)
 			throw "missing runID - failed updateChild()";
-			
+		
 		var childNodeCtrl = this.getChildNodeByCtrl(childCtrl);
 		var elemTrash = document.createElement("div");
 		for (var i = 0; i < childNodeCtrl.lastCreatedElems[runID].elems.length; ++i) {
@@ -411,7 +409,10 @@
 		
 		childCtrl.loadLoopVariables(runID);
 		
-		var ctrlDOM = childNodeCtrl.lastCreatedElems[runID].elems = childCtrl.render(runID);
+		var ctrlDOM = childCtrl.render(runID);
+		var newElems = [];
+		for (var j = 0; j < ctrlDOM.length; ++j) newElems.push(ctrlDOM[j]);
+		childNodeCtrl.lastCreatedElems[runID].elems = newElems;
 		
 		var idxShift = 0;
 		for (i = 0; i < this.childNodeControllers.length; ++i) {

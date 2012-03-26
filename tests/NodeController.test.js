@@ -142,7 +142,7 @@ test("OutputNodeController.render()", function() {
 
 test("NodeController.prepareRunID()", function() {
 	var ctrl = $.wiredui.buildController("<ul>{{each users as user}}<li>${user.name}{{if user.showEmail}} <i>(${user.email})</i>{{/if}}</li>{{/each}}</ul>", $.observable({users: []}));
-	var rootNodes = ctrl.prepareRunID("test");
+	var rootNodes = ctrl.prepareRunID("test").childNodes;
 	
 	same(rootNodes.length, 1);
 	same(rootNodes[0].nodeName, "UL");
@@ -161,7 +161,6 @@ test("Child NodeController DOM positioning", function() {
 	var ctrl = $.wiredui.buildController("<div><span1/>${aa}<span2/>${bb}<span3/><span4/>${cc}{{if true}} ${aa} {{/if}}</div>", data);
 	
 	var DOM = ctrl.render();
-	console.log(DOM)
 	same(DOM[0].childNodes[1].nodeValue, "aa")
 	same(DOM[0].childNodes[3].nodeValue, "bb")
 	same(DOM[0].childNodes[6].nodeValue, "cc")
