@@ -146,7 +146,7 @@ test("NodeController.prepareRunID()", function() {
 	
 	same(rootNodes.length, 1);
 	same(rootNodes[0].nodeName, "UL");
-	same(ctrl.childNodeControllers[0].lastCreatedElems["test"].parentElem, rootNodes[0]);
+	same(ctrl.childNodeControllers[0].visibleElems["test"].parentElem, rootNodes[0]);
 });
 
 test("NodeController.removeListener()", function() {

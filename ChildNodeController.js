@@ -2,8 +2,8 @@
 
 	$.wiredui.ChildNodeController = function() {
 		
-		/* Array<DOMElem */
-		this.lastCreatedElems = [];
+		/* Array<DOMElem> */
+		this.visibleElems = [];
 		
 		/* $.wiredui.NodeController */
 		this.nodeController = null;

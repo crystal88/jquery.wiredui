@@ -265,7 +265,7 @@
 	
 	NodeController.prototype.prepareRunID = function(runID) {
 		for (var i = 0; i < this.childNodeControllers.length; ++i) {
-			this.childNodeControllers[i].lastCreatedElems[runID] = {
+			this.childNodeControllers[i].visibleElems[runID] = {
 				parentElem: null,
 				elems: []
 			};
@@ -292,7 +292,7 @@
 				var newElem = swallowCopyElem( elem );
 				for (var j = 0; j < this.childNodeControllers.length; ++j) {
 					if (this.childNodeControllers[j].position.parentElem === elem) {
-						this.childNodeControllers[j].lastCreatedElems[runID].parentElem = newElem;
+						this.childNodeControllers[j].visibleElems[runID].parentElem = newElem;
 					}
 				}
 				var newChildNodes = traverse.call( this, elem.childNodes ).childNodes;
@@ -359,7 +359,7 @@
 		var idxShift = 0;
 		var prevParentElem = null;
 		for (var i = 0; i < this.childNodeControllers.length; ++i) {
-			var parentElem = this.childNodeControllers[i].lastCreatedElems[runID].parentElem;
+			var parentElem = this.childNodeControllers[i].visibleElems[runID].parentElem;
 			if (null == parentElem) {
 				parentElem = rval;
 			}
@@ -369,7 +369,7 @@
 			var ctrlDOM =  ctrl.render(runID);
 			var newElems = [];
 			for (var j = 0; j < ctrlDOM.length; ++j) newElems.push(ctrlDOM[j]);
-			this.childNodeControllers[i].lastCreatedElems[runID].elems = newElems;
+			this.childNodeControllers[i].visibleElems[runID].elems = newElems;
 			if (prevParentElem !== parentElem) {
 				idxShift = 0;
 			}
@@ -402,8 +402,8 @@
 		
 		var childNodeCtrl = this.getChildNodeByCtrl(childCtrl);
 		var elemTrash = document.createElement("div");
-		for (var i = 0; i < childNodeCtrl.lastCreatedElems[runID].elems.length; ++i) {
-			elemTrash.appendChild( childNodeCtrl.lastCreatedElems[runID].elems[i] );
+		for (var i = 0; i < childNodeCtrl.visibleElems[runID].elems.length; ++i) {
+			elemTrash.appendChild( childNodeCtrl.visibleElems[runID].elems[i] );
 		}
 		childCtrl.removeListeners(runID);
 		
@@ -412,7 +412,7 @@
 		var ctrlDOM = childCtrl.render(runID);
 		var newElems = [];
 		for (var j = 0; j < ctrlDOM.length; ++j) newElems.push(ctrlDOM[j]);
-		childNodeCtrl.lastCreatedElems[runID].elems = newElems;
+		childNodeCtrl.visibleElems[runID].elems = newElems;
 		
 		var idxShift = 0;
 		for (i = 0; i < this.childNodeControllers.length; ++i) {
@@ -420,10 +420,10 @@
 				break;
 			}
 			if (this.childNodeControllers[i].position.parentElem == childNodeCtrl.position.parentElem) {
-				idxShift += childNodeCtrl.lastCreatedElems[runID].elems.length;
+				idxShift += childNodeCtrl.visibleElems[runID].elems.length;
 			}
 		}
-		appendAtPosition(childNodeCtrl.lastCreatedElems[runID].parentElem
+		appendAtPosition(childNodeCtrl.visibleElems[runID].parentElem
 			, ctrlDOM
 			, childNodeCtrl.position.idx + idxShift);
 	}
