@@ -71,3 +71,25 @@ test("each - idx and val", function() {
 	same(DOM[0].childNodes[1].childNodes[4].childNodes[0].nodeValue, 'user2@example.com')
 	
 });
+
+test("proper scope handling", function() {
+	var data = $.observable({
+		users: [
+			{name: "user1", email: "user1@example.org"},
+			{name: "user2", email: "user2@example.org"}
+		],
+		user: "u",
+		idx: "out-of-loop"
+	});
+	var ctrl = $.wiredui.buildController("<div><span>${user}</span>{{each users as idx => user}}${idx + 1}${user.name}{{/each}}<span2>${idx}${user}</span2></div>", data);
+	var DOM = ctrl.render();
+	console.log(DOM)
+	same(DOM[0].childNodes[0].childNodes[0].nodeValue, "u");
+	same(DOM[0].childNodes[1].nodeValue, "1");
+	same(DOM[0].childNodes[2].nodeValue, "user1");
+	same(DOM[0].childNodes[3].nodeValue, "2");
+	same(DOM[0].childNodes[4].nodeValue, "user2");
+	same(DOM[0].childNodes[5].childNodes[0].nodeValue, "u");
+	same(DOM[0].childNodes[5].childNodes[1].nodeValue, "out-of-loop");
+	
+});
