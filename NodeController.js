@@ -307,6 +307,23 @@
 		return traverse.call( this, this.childNodes );
 	}
 	
+	var debugElems = function(elems) {
+		var rval = [];
+		for (var i = 0; i < elems.length; ++i) {
+			if (elems[i].nodeName == "#text") {
+				rval.push(elems[i].nodeValue);
+			} else {
+				rval.push(elems[i].nodeName);
+			}
+		}
+		return rval;
+	}
+	
+	/**
+	 * @param DOMElem parentElem 
+	 * @param NodeList childElems
+	 * @param integer idx
+	 */
 	var appendAtPosition = function appendAtPosition(parentElem, childElems, idx) {
 		var nodeStack = [];
 		while (idx < parentElem.childNodes.length) {
@@ -314,10 +331,13 @@
 			nodeStack.push(remChild);
 			parentElem.removeChild( remChild );
 		}
-		
-		
-		for (var j = 0; j < childElems.length; ++j) {
-			parentElem.appendChild(childElems[j]);
+
+		var tmpArr = [];
+		for (var i = 0; i < childElems.length; ++i) {
+			tmpArr.push(childElems[i]);
+		}
+		for (var j = 0; j < tmpArr.length; j++) {
+			parentElem.appendChild(tmpArr[j]);
 		}
 			
 		for (j = 0; j < nodeStack.length; ++j) {
