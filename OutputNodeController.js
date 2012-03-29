@@ -1,6 +1,6 @@
 (function($) {
 	
-	var OutputNodeController = $.wiredui.OutputNodeController = function(varCtx, parentController, token) {
+	var OutputNodeController = $.wiredui.OutputNodeController = function OutputNodeController(varCtx, parentController, token) {
 		this.parentController = parentController;
 		this.expr = new $.wiredui.Expression(token);
 		this.initNode(varCtx);
