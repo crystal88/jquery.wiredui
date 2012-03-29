@@ -11,8 +11,20 @@
 		
 		this.listener = null;
 		
-		this.pushedNode = null;
+		this.pushedNodes = [];
 	};
+	
+	var debugElems = function(elems) {
+		var rval = [];
+		for (var i = 0; i < elems.length; ++i) {
+			if (elems[i].nodeName == "#text") {
+				rval.push(elems[i].nodeValue);
+			} else {
+				rval.push(elems[i].nodeName);
+			}
+		}
+		return rval;
+	}
 	
 	DOMIterator.prototype.read = function(parentNode) {
 		if (null === this.listener)
@@ -29,29 +41,32 @@
 			if (nodeDbg == "#text") {
 				nodeDbg += " (" + childNode.nodeValue + ")";
 			}
-			// console.log("start: " + nodeDbg);
+			console.log("start: " + nodeDbg);
 
 			this.listener.startElem(childNode);
 			
-			while (this.pushedNode !== null) {
-				var tmp = this.pushedNode;
+			while (this.pushedNodes.length > 0) {
+				var tmp = this.pushedNodes.pop();
+				console.log("re-start ", debugElems( [tmp] )[0])
 				this.pushedNode = null;
 				this.listener.startElem(tmp);
 				this.listener.finishElem(tmp);
+				console.log("re-finish ", debugElems( [tmp] )[0])
 			}
 			
 			this.read(childNode);
 			
 			this.listener.finishElem(childNode);
-			// console.log("finish: " + nodeDbg);
+			console.log("finish: " + nodeDbg);
 		}
 	}
 	
 	DOMIterator.prototype.pushTextNode = function(str) {
+		console.warn("pushed back '" + str + "'", typeof str, str.length, this.listener);
 		if (typeof(str) == "string") {
 			str = document.createTextNode(str);
 		}
-		this.pushedNode = str;
+		this.pushedNodes.push(str);
 	}
 	
 })(jQuery);

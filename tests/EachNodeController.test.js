@@ -81,7 +81,12 @@ test("proper scope handling", function() {
 		user: {name: "u"},
 		idx: "out-of-loop"
 	});
-	var ctrl = $.wiredui.buildController("<div><span>${user.name}</span>{{each users as idx => user}}${idx + 1}${user.name}{{/each}}<span2>${idx}${user.name}</span2></div>", data);
+	var ctrl = $.wiredui.buildController("<div>"
+		+ "<span>${user.name}</span>"
+		+ "{{each users as idx => user}}"
+		+ 	"${idx + 1}${user.name}"
+		+ "{{/each}}"
+		+ "<span2>${idx}${user.name}</span2></div>", data);
 	var DOM = ctrl.render();
 	console.log(DOM)
 	same(DOM[0].childNodes[0].childNodes[0].nodeValue, "u");

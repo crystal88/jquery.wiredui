@@ -158,17 +158,52 @@ test("NodeController.removeListener()", function() {
 
 test("Child NodeController DOM positioning", function() {
 	var data = $.observable({aa:"aa", bb:"bb", cc:"cc", dd:"dd"});
-	var ctrl = $.wiredui.buildController("<div><span1/>${aa}<span2/>${bb}<span3/><span4/>${cc}{{if true}} ${aa}x{{/if}}</div>", data);
+	var ctrl = $.wiredui.buildController("<div><span1/>${aa}<span2/>"
+		+ "${bb}<span3/><span4/>"
+		+ "${cc}"
+		+ "{{if true}}y${aa}x{{/if}}"
+		+ "</div>", data);
 	
 	var DOM = ctrl.render();
 	same(DOM[0].childNodes[1].nodeValue, "aa")
 	same(DOM[0].childNodes[3].nodeValue, "bb")
 	same(DOM[0].childNodes[6].nodeValue, "cc")
-	same(DOM[0].childNodes[7].nodeValue, " ")
+	same(DOM[0].childNodes[7].nodeValue, "y")
 	same(DOM[0].childNodes[8].nodeValue, "aa")
 	same(DOM[0].childNodes[9].nodeValue, "x")
 	console.log(DOM)
 	
 	data().aa("aa-mod");
+	same(DOM[0].childNodes[1].nodeValue, "aa-mod")
+	same(DOM[0].childNodes[8].nodeValue, "aa-mod")
 });
 /**/
+
+test("Child NodeController DOM positioning in plaintext env", function() {
+	var data = $.observable({
+		user: {name: "main user", email: "mainuser@example.org"},
+		users: [
+			{name: "user1", showEmail: true, email: "user1@example.org"},
+			{name: "user2", showEmail: false, email: "user2@example.org"},
+			{name: "user3", showEmail: false, email: "user3@example.org"},
+			{name: "user4", showEmail: true, email: "user4@example.org"},
+			{name: "user5", showEmail: false, email: "user5@example.org"}
+		]
+	});
+	var ctrl = $.wiredui.buildController("<div>hello ${user.name}"
+		+ "all users:"
+		+ "{{each users as idx => user}}"
+		+ 	"{{if user.showEmail }}"
+		+ 		"email: ${user.email}"
+		+ 	"{{/if}}"
+		+ 	"${idx}. name: ${user.name}"
+		+ "{{/each}}"
+		+ "your email: ${user.email}</div>", data);
+		
+	var DOM = ctrl.render();
+	
+	
+	console.log(DOM[0]);
+	document.getElementById("test-output").appendChild(DOM[0]);
+	console.log(ctrl);
+});

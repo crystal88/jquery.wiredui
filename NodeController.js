@@ -430,6 +430,7 @@
 		childCtrl.loadLoopVariables(runID);
 		
 		var ctrlDOM = childCtrl.render(runID);
+		var oldElems = childNodeCtrl.visibleElems[runID].elems;
 		var newElems = [];
 		for (var j = 0; j < ctrlDOM.length; ++j) newElems.push(ctrlDOM[j]);
 		childNodeCtrl.visibleElems[runID].elems = newElems;
@@ -440,12 +441,63 @@
 				break;
 			}
 			if (this.childNodeControllers[i].position.parentElem == childNodeCtrl.position.parentElem) {
-				idxShift += childNodeCtrl.visibleElems[runID].elems.length;
+				// idxShift += childNodeCtrl.visibleElems[runID].elems.length;
+				idxShift += this.childNodeControllers[i].visibleElems[runID].elems.length;
+				console.log("idxShift += " + this.childNodeControllers[i].visibleElems[runID].elems.length, this.childNodeControllers[i].nodeController, runID)
 			}
 		}
+		var parentElem = childNodeCtrl.visibleElems[runID].parentElem;
+		if (null === parentElem) {
+			console.log(this, childNodeCtrl.position.idx, idxShift, "parentController.partialUpdateChild()")
+			this.parentController.partialUpdateChild(this, runID
+				, childNodeCtrl.position.idx + idxShift
+				, oldElems
+				, ctrlDOM);
+		} else {
+			appendAtPosition(parentElem
+				, ctrlDOM
+				, childNodeCtrl.position.idx + idxShift);
+		}
+	}
+	
+	/**
+	 * @param NodeController childCtrl
+	 * @param String runID
+	 * @param Integer insertIdx
+	 * @param Array<DOMElem> oldElems
+	 * @param NodeList newElems 
+	 */
+	NodeController.prototype.partialUpdateChild = function(childCtrl, runID, insertIdx, oldElems, newElems) {
+		var childNodeCtrl = this.getChildNodeByCtrl(childCtrl);
+		
+		if (childCtrl instanceof $.wiredui.EachNodeController) {
+			runID = ((tmpArr = runID.split(";")).pop(), tmpArr).join(";")
+		}
+		
+		var idxShift = 0;
+		for (i = 0; i < this.childNodeControllers.length; ++i) {
+			if (this.childNodeControllers[i] === childNodeCtrl) {
+				break;
+			}
+			if (this.childNodeControllers[i].position.parentElem == childNodeCtrl.position.parentElem) {
+				idxShift += this.childNodeControllers[i].visibleElems[runID].elems.length - 1
+						+ this.childNodeControllers[i].position.idx;
+			}
+		}
+		
+		var elemTrash = document.createElement("trash");
+		for (var i = 0; i < oldElems.length; ++i) {
+			elemTrash.appendChild( oldElems[i] );
+		}
+		
+		console.log(insertIdx, idxShift, this, runID, childNodeCtrl, childNodeCtrl.visibleElems[runID]);
 		appendAtPosition(childNodeCtrl.visibleElems[runID].parentElem
-			, ctrlDOM
-			, childNodeCtrl.position.idx + idxShift);
+			, newElems
+			, insertIdx + idxShift);
+	}
+	
+	NodeController.prototype.getParentElemForChild = function(childCtrl, runID) {
+		return this.getChildNodeByCtrl(childCtrl).visibleElems[runID].parentElem;
 	}
 
 })(jQuery);

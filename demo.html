@@ -25,5 +25,18 @@
 			{{/each}}
 		</table>
 		
+		
+		<div id="plaintext-example">
+		    hello ${user.name}
+		    all users:
+		    {{each users as idx => user}}
+				{{if user.showEmail }}
+				    email: ${user.email}
+				{{/if}}
+				${idx}. name: ${user.name}
+			{{/each}}
+			your email: ${user.email}
+		</div>
+		
 	</body>
 </html>
