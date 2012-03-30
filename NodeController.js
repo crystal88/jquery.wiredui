@@ -393,7 +393,7 @@
 			if (prevParentElem !== parentElem) {
 				idxShift = 0;
 			}
-			appendAtPosition(parentElem, ctrlDOM, posIdx + idxShift);
+			appendAtPosition(parentElem, ctrlDOM, this.getIdxShiftFor(runID, parentElem, this.childNodeControllers[i]));
 			
 			if (prevParentElem === parentElem || prevParentElem === null) {
 				idxShift += ctrlDOM.length;
@@ -401,6 +401,27 @@
 			prevParentElem = parentElem;
 		}
 		return rval.childNodes;
+	}
+	
+	NodeController.prototype.getIdxShiftFor = function(runID, parentElem, targetController) {
+		console.group("NodeController.getIdxShiftFor()");
+		console.log("params: ", arguments);
+		console.log("this: ", this);
+		var rval = targetController && targetController.position.idx || 0;
+		for (var i = 0; i < this.childNodeControllers.length; ++i) {
+			var childCtrl = this.childNodeControllers[i];
+			console.log("this.childNodeControllers[ " + i + " ] = ", childCtrl);
+			if (childCtrl === targetController) {
+				break;
+			}
+			if (childCtrl.visibleElems[runID].parentElem === parentElem) {
+				console.log("rval += ", childCtrl.visibleElems[runID].elems.length, childCtrl);
+				rval += childCtrl.visibleElems[runID].elems.length;
+			}
+		}
+		console.log("rval = ", rval);
+		console.groupEnd();
+		return rval;
 	}
 	
 	NodeController.prototype.render = function() {

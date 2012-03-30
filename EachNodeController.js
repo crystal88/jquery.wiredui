@@ -41,6 +41,33 @@
 		}
 	};
 	
+	EachNodeController.prototype.getIdxShiftFor = function(runID, parentElem, targetController) {
+		console.group("EachNodeController.getIdxShiftFor()");
+		console.log("params: ", arguments);
+		var rval = 0;
+		var tmp, lastSegment;
+		var parentRunID = ( (tmp = runID.split(";")), lastSegment = tmp.pop(), tmp).join(";");
+		console.log("starting before-run counting");
+		for (var i = 0; i < lastSegment; ++i) {
+			var parentRval = $.wiredui.NodeController.prototype.getIdxShiftFor.call(this, parentRunID + ";" + i, null);
+			rval += targetController.position.idx + parentRval;
+			console.log("rval += ", targetController.position.idx + " + " + parentRval);
+		}
+		console.log("starting current run counting");
+		for (i = 0; i < this.childNodeControllers.length; ++i) {
+			var childCtrl = this.childNodeControllers[i];
+			if (childCtrl === targetController) {
+				break;
+			}
+			if (childCtrl.visibleElems[runID].parentElem === parentElem) {
+				rval += childCtrl.visibleElems[runID].elems.length;
+			}
+		}
+		console.log("rval = ", rval);
+		console.groupEnd();
+		return rval;
+	}
+	
 	EachNodeController.prototype.render = function(runID) {
 		var rval = [];
 		var coll = this.varCtx.getValue(this.collVarName)
