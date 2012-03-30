@@ -200,10 +200,20 @@ test("Child-NodeController DOM positioning in plaintext env", function() {
 		+ "{{/each}}"
 		+ "your email: ${user.email}</div>", data);
 		
-	var DOM = ctrl.render();
+	var div = ctrl.render()[0];
+
+	var expected = ["hello ", "main user", "all users:"
+		, "email: ", "user1@example.org", "1", ". name: ", "user1"
+		, "2", ". name: ", "user2"
+		, "3", ". name: ", "user3"
+		, "email: ", "user4@example.org", "4", ". name: ", "user4"
+		, "5", ". name: ", "user5"
+		, "your email: ", "mainuser@example.org"];
 	
+	for (var i = 0; i < expected.length; ++i) {
+		same(div.childNodes[ i ].nodeValue, expected[ i ]);
+	}
 	
-	console.log(DOM[0]);
-	//document.getElementById("test-output").appendChild(DOM[0]);
+	console.log(div);
 	console.log(ctrl);
 });
