@@ -188,11 +188,11 @@ test("Child NodeController DOM positioning in plaintext env", function() {
 	var data = $.observable({
 		user: {name: "main user", email: "mainuser@example.org"},
 		users: [
-			{name: "user1", showEmail: true, email: "user1@example.org"}/*,
+			{name: "user1", showEmail: true, email: "user1@example.org"},
 			{name: "user2", showEmail: false, email: "user2@example.org"},
-			{name: "user3", showEmail: false, email: "user3@example.org"}/*,
+			{name: "user3", showEmail: false, email: "user3@example.org"},
 			{name: "user4", showEmail: true, email: "user4@example.org"},
-			{name: "user5", showEmail: false, email: "user5@example.org"}*/
+			{name: "user5", showEmail: false, email: "user5@example.org"}
 		]
 	});
 	var ctrl = $.wiredui.buildController("<div>hello ${user.name}"

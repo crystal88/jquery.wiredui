@@ -390,6 +390,7 @@
 			var newElems = [];
 			for (var j = 0; j < ctrlDOM.length; ++j) newElems.push(ctrlDOM[j]);
 			this.childNodeControllers[i].visibleElems[runID].elems = newElems;
+			this.childNodeControllers[i].visibleElems[runID].parentElem = parentElem;
 			if (prevParentElem !== parentElem) {
 				idxShift = 0;
 			}
