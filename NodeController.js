@@ -376,8 +376,6 @@
 			throw "missing runID - failed renderBlock()";
 
 		var rval = this.prepareRunID(runID);
-		var idxShift = 0;
-		var prevParentElem = null;
 		for (var i = 0; i < this.childNodeControllers.length; ++i) {
 			var parentElem = this.childNodeControllers[i].visibleElems[runID].parentElem;
 			if (null == parentElem) {
@@ -388,40 +386,36 @@
 			var ctrl = this.childNodeControllers[i].nodeController;
 			var ctrlDOM =  ctrl.render(runID);
 			var newElems = [];
-			for (var j = 0; j < ctrlDOM.length; ++j) newElems.push(ctrlDOM[j]);
+			for (var j = 0; j < ctrlDOM.length; ++j) {
+				newElems.push(ctrlDOM[j]);
+			}
 			this.childNodeControllers[i].visibleElems[runID].elems = newElems;
 			this.childNodeControllers[i].visibleElems[runID].parentElem = parentElem;
-			if (prevParentElem !== parentElem) {
-				idxShift = 0;
-			}
-			appendAtPosition(parentElem, ctrlDOM, this.getIdxShiftFor(runID, parentElem, this.childNodeControllers[i]));
-			
-			if (prevParentElem === parentElem || prevParentElem === null) {
-				idxShift += ctrlDOM.length;
-			}
-			prevParentElem = parentElem;
+			appendAtPosition(parentElem, ctrlDOM, this.getIdxShiftFor(runID
+				, parentElem
+				, this.childNodeControllers[i]));
 		}
 		return rval.childNodes;
 	}
 	
 	NodeController.prototype.getIdxShiftFor = function(runID, parentElem, targetController) {
-		console.group("NodeController.getIdxShiftFor()");
+		/* console.group("NodeController.getIdxShiftFor()");
 		console.log("params: ", arguments);
-		console.log("this: ", this);
+		console.log("this: ", this); */
 		var rval = targetController && targetController.position.idx || 0;
 		for (var i = 0; i < this.childNodeControllers.length; ++i) {
 			var childCtrl = this.childNodeControllers[i];
-			console.log("this.childNodeControllers[ " + i + " ] = ", childCtrl);
+			// console.log("this.childNodeControllers[ " + i + " ] = ", childCtrl);
 			if (childCtrl === targetController) {
 				break;
 			}
 			if (childCtrl.visibleElems[runID].parentElem === parentElem) {
-				console.log("rval += ", childCtrl.visibleElems[runID].elems.length, childCtrl);
+				// console.log("rval += ", childCtrl.visibleElems[runID].elems.length, childCtrl);
 				rval += childCtrl.visibleElems[runID].elems.length;
 			}
 		}
-		console.log("rval = ", rval);
-		console.groupEnd();
+		/* console.log("rval = ", rval);
+		console.groupEnd(); */
 		return rval;
 	}
 	
@@ -465,12 +459,12 @@
 			if (this.childNodeControllers[i].position.parentElem == childNodeCtrl.position.parentElem) {
 				// idxShift += childNodeCtrl.visibleElems[runID].elems.length;
 				idxShift += this.childNodeControllers[i].visibleElems[runID].elems.length;
-				console.log("idxShift += " + this.childNodeControllers[i].visibleElems[runID].elems.length, this.childNodeControllers[i].nodeController, runID)
+				// console.log("idxShift += " + this.childNodeControllers[i].visibleElems[runID].elems.length, this.childNodeControllers[i].nodeController, runID)
 			}
 		}
 		var parentElem = childNodeCtrl.visibleElems[runID].parentElem;
 		if (null === parentElem) {
-			console.log(this, childNodeCtrl.position.idx, idxShift, "parentController.partialUpdateChild()")
+			// console.log(this, childNodeCtrl.position.idx, idxShift, "parentController.partialUpdateChild()")
 			this.parentController.partialUpdateChild(this, runID
 				, childNodeCtrl.position.idx + idxShift
 				, oldElems

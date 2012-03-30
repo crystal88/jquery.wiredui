@@ -179,12 +179,7 @@ test("Child NodeController DOM positioning", function() {
 });
 /**/
 
-test("NodeController.getIdxShiftFor()", function() {
-	var ctrl = new $.wiredui.NodeController($.observable({}));
-	
-});
-
-test("Child NodeController DOM positioning in plaintext env", function() {
+test("Child-NodeController DOM positioning in plaintext env", function() {
 	var data = $.observable({
 		user: {name: "main user", email: "mainuser@example.org"},
 		users: [
@@ -209,6 +204,6 @@ test("Child NodeController DOM positioning in plaintext env", function() {
 	
 	
 	console.log(DOM[0]);
-	document.getElementById("test-output").appendChild(DOM[0]);
+	//document.getElementById("test-output").appendChild(DOM[0]);
 	console.log(ctrl);
 });
