@@ -395,7 +395,18 @@
 				, parentElem
 				, this.childNodeControllers[i]));
 		}
+		for (var i = 0; i < this.childNodeControllers.length; ++i) {
+			if (this.childNodeControllers[i].visibleElems[runID].parentElem === rval) {
+				this.childNodeControllers[i].visibleElems[runID].parentElem = null;
+			}
+		}
 		return rval.childNodes;
+	}
+	
+	NodeController.prototype.getVisibleParentElem = function(runID) {
+		var rval = null;
+		
+		return rval;
 	}
 	
 	NodeController.prototype.getIdxShiftFor = function(runID, parentElem, targetController) {
@@ -410,7 +421,6 @@
 				break;
 			}
 			if (childCtrl.visibleElems[runID].parentElem === parentElem) {
-				// console.log("rval += ", childCtrl.visibleElems[runID].elems.length, childCtrl);
 				rval += childCtrl.visibleElems[runID].elems.length;
 			}
 		}
@@ -448,7 +458,10 @@
 		var ctrlDOM = childCtrl.render(runID);
 		var oldElems = childNodeCtrl.visibleElems[runID].elems;
 		var newElems = [];
-		for (var j = 0; j < ctrlDOM.length; ++j) newElems.push(ctrlDOM[j]);
+		for (var j = 0; j < ctrlDOM.length; ++j) {
+			newElems.push(ctrlDOM[j]);
+		}
+		
 		childNodeCtrl.visibleElems[runID].elems = newElems;
 		
 		var idxShift = 0;
@@ -457,22 +470,23 @@
 				break;
 			}
 			if (this.childNodeControllers[i].position.parentElem == childNodeCtrl.position.parentElem) {
-				// idxShift += childNodeCtrl.visibleElems[runID].elems.length;
+				idxShift += childNodeCtrl.visibleElems[runID].elems.length;
 				idxShift += this.childNodeControllers[i].visibleElems[runID].elems.length;
-				// console.log("idxShift += " + this.childNodeControllers[i].visibleElems[runID].elems.length, this.childNodeControllers[i].nodeController, runID)
+				console.log("idxShift += " + this.childNodeControllers[i].visibleElems[runID].elems.length, this.childNodeControllers[i].nodeController, runID)
 			}
 		}
 		var parentElem = childNodeCtrl.visibleElems[runID].parentElem;
 		if (null === parentElem) {
-			// console.log(this, childNodeCtrl.position.idx, idxShift, "parentController.partialUpdateChild()")
+			console.log(this, childNodeCtrl.position.idx, idxShift, "parentController.partialUpdateChild()")
 			this.parentController.partialUpdateChild(this, runID
 				, childNodeCtrl.position.idx + idxShift
 				, oldElems
 				, ctrlDOM);
 		} else {
+			console.log(parentElem.parentNode, ctrlDOM[0].nodeValue, this.getIdxShiftFor(runID, parentElem, childNodeCtrl));
 			appendAtPosition(parentElem
 				, ctrlDOM
-				, childNodeCtrl.position.idx + idxShift);
+				, this.getIdxShiftFor(runID, parentElem, childNodeCtrl));
 		}
 	}
 	

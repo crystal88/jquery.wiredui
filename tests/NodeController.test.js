@@ -216,4 +216,19 @@ test("Child-NodeController DOM positioning in plaintext env", function() {
 	
 	console.log(div);
 	console.log(ctrl);
+	
+	data().users(3)().email("user4-mod@example.org");
+	return;
+	var expected = ["hello ", "main user", "all users:"
+		, "email: ", "user1@example.org", "1", ". name: ", "user1"
+		, "2", ". name: ", "user2"
+		, "3", ". name: ", "user3"
+		, "email: ", "user4-mod@example.org", "4", ". name: ", "user4"
+		, "5", ". name: ", "user5"
+		, "your email: ", "mainuser@example.org"];
+	
+	for (var i = 0; i < expected.length; ++i) {
+		same(div.childNodes[ i ].nodeValue, expected[ i ]);
+	}
+	
 });
