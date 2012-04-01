@@ -218,7 +218,7 @@ test("Child-NodeController DOM positioning in plaintext env", function() {
 	console.log(ctrl);
 	
 	data().users(3)().email("user4-mod@example.org");
-	return;
+	
 	var expected = ["hello ", "main user", "all users:"
 		, "email: ", "user1@example.org", "1", ". name: ", "user1"
 		, "2", ". name: ", "user2"

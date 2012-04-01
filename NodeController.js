@@ -456,7 +456,6 @@
 		childCtrl.loadLoopVariables(runID);
 		
 		var ctrlDOM = childCtrl.render(runID);
-		var oldElems = childNodeCtrl.visibleElems[runID].elems;
 		var newElems = [];
 		for (var j = 0; j < ctrlDOM.length; ++j) {
 			newElems.push(ctrlDOM[j]);
@@ -477,10 +476,9 @@
 		}
 		var parentElem = childNodeCtrl.visibleElems[runID].parentElem;
 		if (null === parentElem) {
-			console.log(this, childNodeCtrl.position.idx, idxShift, "parentController.partialUpdateChild()")
-			this.parentController.partialUpdateChild(this, runID
-				, childNodeCtrl.position.idx + idxShift
-				, oldElems
+			console.log(this, runID, this.getIdxShiftFor(runID, parentElem, childNodeCtrl), "parentController.partialUpdateChild()", childNodeCtrl.nodeController)
+			this.parentController.partialUpdateChild(this, this.runIDForParent(runID)
+				, this.getIdxShiftFor(runID, parentElem, childNodeCtrl)
 				, ctrlDOM);
 		} else {
 			console.log(parentElem.parentNode, ctrlDOM[0].nodeValue, this.getIdxShiftFor(runID, parentElem, childNodeCtrl));
@@ -490,40 +488,40 @@
 		}
 	}
 	
+	NodeController.prototype.runIDForParent = function(runID) {
+		return runID;
+	}
+	
 	/**
 	 * @param NodeController childCtrl
 	 * @param String runID
 	 * @param Integer insertIdx
-	 * @param Array<DOMElem> oldElems
 	 * @param NodeList newElems 
 	 */
-	NodeController.prototype.partialUpdateChild = function(childCtrl, runID, insertIdx, oldElems, newElems) {
+	NodeController.prototype.partialUpdateChild = function(childCtrl, runID, insertIdx, newElems) {
 		var childNodeCtrl = this.getChildNodeByCtrl(childCtrl);
-		
-		if (childCtrl instanceof $.wiredui.EachNodeController) {
+		/*if (childCtrl instanceof $.wiredui.EachNodeController) {
 			runID = ((tmpArr = runID.split(";")).pop(), tmpArr).join(";")
-		}
+		}*/
 		
-		var idxShift = 0;
-		for (i = 0; i < this.childNodeControllers.length; ++i) {
-			if (this.childNodeControllers[i] === childNodeCtrl) {
-				break;
-			}
-			if (this.childNodeControllers[i].position.parentElem == childNodeCtrl.position.parentElem) {
-				idxShift += this.childNodeControllers[i].visibleElems[runID].elems.length - 1
-						+ this.childNodeControllers[i].position.idx;
-			}
-		}
-		
-		var elemTrash = document.createElement("trash");
-		for (var i = 0; i < oldElems.length; ++i) {
-			elemTrash.appendChild( oldElems[i] );
-		}
+		var parentElem = childNodeCtrl.visibleElems[runID].parentElem;
+		console.log("itt: ", this);
+		var idxShift = this.getIdxShiftFor(runID, parentElem, childNodeCtrl);
 		
 		console.log(insertIdx, idxShift, this, runID, childNodeCtrl, childNodeCtrl.visibleElems[runID]);
-		appendAtPosition(childNodeCtrl.visibleElems[runID].parentElem
-			, newElems
-			, insertIdx + idxShift);
+		if (null === parentElem) {
+			console.log("parentController.partialUpdateChild(", this
+				, this.runIDForParent(runID)
+				, insertIdx + idxShift, newElems);
+			this.parentController.partialUpdateChild(this
+				, this.runIDForParent(runID)
+				, insertIdx + idxShift
+				, newElems);
+		} else {
+			appendAtPosition(parentElem
+				, newElems
+				, insertIdx + idxShift);
+		}
 	}
 	
 	NodeController.prototype.getParentElemForChild = function(childCtrl, runID) {

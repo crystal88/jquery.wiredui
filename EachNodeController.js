@@ -72,6 +72,11 @@
 		return rval;
 	}
 	
+	EachNodeController.prototype.runIDForParent = function(runID) {
+		var tmpArr;
+		return ((tmpArr = runID.split(";")).pop(), tmpArr).join(";");
+	}
+	
 	EachNodeController.prototype.render = function(runID) {
 		var rval = [];
 		var coll = this.varCtx.getValue(this.collVarName)
