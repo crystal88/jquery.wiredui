@@ -214,9 +214,61 @@ test("Child-NodeController DOM positioning in plaintext env", function() {
 		same(div.childNodes[ i ].nodeValue, expected[ i ]);
 	}
 	
+	// validating internal data structure
+	same(ctrl.childNodeControllers.length, 3)
+	ok(ctrl.childNodeControllers[0].nodeController instanceof $.wiredui.OutputNodeController)
+	ok(ctrl.childNodeControllers[1].nodeController instanceof $.wiredui.EachNodeController)
+	ok(ctrl.childNodeControllers[2].nodeController instanceof $.wiredui.OutputNodeController)
+	
+	var outChild1 = ctrl.childNodeControllers[0];
+	same(outChild1.visibleElems.length, 1)
+	same(outChild1.visibleElems[0].elems[0], div.childNodes[1]);
+	
+	var eachChild = ctrl.childNodeControllers[1];
+	same(eachChild.visibleElems.length, 1);
+	same(eachChild.visibleElems[0].elems.length, 19);
+	
+	same(eachChild.nodeController.childNodeControllers.length, 3);
+	ok(eachChild.nodeController.childNodeControllers[0].nodeController instanceof $.wiredui.IfNodeController);
+	
+	var ifChild = eachChild.nodeController.childNodeControllers[0];
+	same(ifChild.nodeController.childNodeControllers.length, 1)
+	var ifoutChild = ifChild.nodeController.childNodeControllers[0];
+	var expectedKeys = ["0;0", "0;1", "0;2", "0;3", "0;4"];
+	for (var i in expectedKeys) {
+		ok(ifChild.visibleElems[ expectedKeys[i] ] !== undefined)
+	}
+	
+	var texts = div.childNodes;
+	same(ifChild.visibleElems["0;0"].elems.length, 2);
+	same(ifChild.visibleElems["0;0"].elems[0], texts[3]);
+	same(ifChild.visibleElems["0;0"].elems[0].nodeValue, "email: ");
+	same(ifChild.visibleElems["0;0"].elems[1], texts[4]);
+	same(ifChild.visibleElems["0;0"].elems[1].nodeValue, "user1@example.org");
+	
+	same(ifoutChild.visibleElems["0;0"].elems.length, 1);
+	same(ifoutChild.visibleElems["0;0"].elems[0].nodeValue, "user1@example.org");
+	
+	same(ifChild.visibleElems["0;1"].elems.length, 0);
+	same(ifChild.visibleElems["0;2"].elems.length, 0);
+	
+	same(ifChild.visibleElems["0;3"].elems.length, 2);
+	same(ifChild.visibleElems["0;3"].elems[0], texts[14]);
+	same(ifChild.visibleElems["0;3"].elems[0].nodeValue, "email: ");
+	same(ifChild.visibleElems["0;3"].elems[1], texts[15]);
+	same(ifChild.visibleElems["0;3"].elems[1].nodeValue, "user4@example.org");
+	
+	same(ifoutChild.visibleElems["0;3"].elems[0].nodeValue, "user4@example.org");
+	
+	same(ifChild.visibleElems["0;4"].elems.length, 0);
+	
+	same(ctrl.getIdxShiftFor("0", div, eachChild), 3);
+	
+	same(eachChild.nodeController.getIdxShiftFor("0;0", null, ifChild), 0);
+	
 	console.log(div);
 	console.log(ctrl);
-	
+	//return;
 	data().users(3)().email("user4-mod@example.org");
 	
 	var expected = ["hello ", "main user", "all users:"

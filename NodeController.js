@@ -477,7 +477,8 @@
 		var parentElem = childNodeCtrl.visibleElems[runID].parentElem;
 		if (null === parentElem) {
 			console.log(this, runID, this.getIdxShiftFor(runID, parentElem, childNodeCtrl), "parentController.partialUpdateChild()", childNodeCtrl.nodeController)
-			this.parentController.partialUpdateChild(this, this.runIDForParent(runID)
+			this.parentController.partialUpdateChild(this
+				, this.runIDForParent(runID)
 				, this.getIdxShiftFor(runID, parentElem, childNodeCtrl)
 				, ctrlDOM);
 		} else {
