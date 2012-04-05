@@ -266,9 +266,11 @@ test("Child-NodeController DOM positioning in plaintext env", function() {
 	
 	same(eachChild.nodeController.getIdxShiftFor("0;0", null, ifChild), 0);
 	
+	same(eachChild.nodeController.getIdxShiftFor("0;1", null, ifChild), 4);
+	
 	console.log(div);
-	console.log(ctrl);
-	//return;
+	//console.log(ctrl);
+	return;
 	data().users(3)().email("user4-mod@example.org");
 	
 	var expected = ["hello ", "main user", "all users:"

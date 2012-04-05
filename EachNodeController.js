@@ -42,33 +42,33 @@
 	};
 	
 	EachNodeController.prototype.getIdxShiftFor = function(runID, parentElem, targetController) {
-		/*console.group("EachNodeController.getIdxShiftFor()");
-		console.log("params: ", arguments);*/
+		console.group("EachNodeController.getIdxShiftFor()");
+		console.log("params: ", arguments);/**/
 		var rval = targetController.position.idx;
 		var tmp, lastSegment;
 		var parentRunID = ( (tmp = runID.split(";")), lastSegment = tmp.pop(), tmp).join(";");
-		//console.group("before-run counting");
+		console.group("before-run counting");
 		for (var i = 0; i < lastSegment; ++i) {
-			var parentRval = $.wiredui.NodeController.prototype.getIdxShiftFor.call(this, parentRunID + ";" + i, undefined);
+			var parentRval = $.wiredui.NodeController.prototype.getIdxShiftFor.call(this, parentRunID + ";" + i, null, undefined);
 			rval += targetController.position.idx + parentRval;
-			// console.log("rval += ", targetController.position.idx + " + " + parentRval);
+			console.log("rval += ", targetController.position.idx + " + " + parentRval);
 		}
-		/* console.groupEnd();
-		console.group("current run counting"); */
+		console.groupEnd();
+		console.group("current run counting");
 		for (i = 0; i < this.childNodeControllers.length; ++i) {
 			var childCtrl = this.childNodeControllers[i];
-			// console.log("testing childNodeControllers[ " + i + " ]", this.childNodeControllers[i].nodeController);
+			console.log("testing childNodeControllers[ " + i + " ]", this.childNodeControllers[i].nodeController);
 			if (childCtrl === targetController) {
 				break;
 			}
-			//console.log(childCtrl.visibleElems[runID].parentElem, " =?= ", parentElem);
+			console.log(childCtrl.visibleElems[runID].parentElem, " =?= ", parentElem);
 			if (childCtrl.visibleElems[runID].parentElem === parentElem) {
 				rval += childCtrl.visibleElems[runID].elems.length;
 			}
 		}
-		/*console.groupEnd();
+		console.groupEnd();
 		console.log("rval = ", rval);
-		console.groupEnd();*/
+		console.groupEnd();
 		return rval;
 	}
 	

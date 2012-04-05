@@ -325,6 +325,8 @@
 	 * @param integer idx
 	 */
 	var appendAtPosition = function appendAtPosition(parentElem, childElems, idx) {
+		console.group("appendAtPosition()");
+		console.log("params: ", debugElems(parentElem.childNodes), debugElems(childElems), idx);
 		var nodeStack = [];
 		while (idx < parentElem.childNodes.length) {
 			var remChild = parentElem.childNodes[idx];
@@ -343,6 +345,8 @@
 		for (j = 0; j < nodeStack.length; ++j) {
 			parentElem.appendChild(nodeStack[j]);
 		}
+		console.log("result: ", debugElems(parentElem.childNodes));
+		console.groupEnd();
 	}
 	
 	NodeController.prototype.saveLoopVariables = function(runID) {
@@ -391,7 +395,7 @@
 			}
 			this.childNodeControllers[i].visibleElems[runID].elems = newElems;
 			this.childNodeControllers[i].visibleElems[runID].parentElem = parentElem;
-			appendAtPosition(parentElem, ctrlDOM, this.getIdxShiftFor(runID
+			appendAtPosition(parentElem, ctrlDOM, NodeController.prototype.getIdxShiftFor.call(this, runID
 				, parentElem
 				, this.childNodeControllers[i]));
 		}
@@ -410,13 +414,13 @@
 	}
 	
 	NodeController.prototype.getIdxShiftFor = function(runID, parentElem, targetController) {
-		/* console.group("NodeController.getIdxShiftFor()");
+		console.group("NodeController.getIdxShiftFor()");
 		console.log("params: ", arguments);
-		console.log("this: ", this); */
+		console.log("this: ", this);
 		var rval = targetController && targetController.position.idx || 0;
 		for (var i = 0; i < this.childNodeControllers.length; ++i) {
 			var childCtrl = this.childNodeControllers[i];
-			// console.log("this.childNodeControllers[ " + i + " ] = ", childCtrl);
+			console.log("this.childNodeControllers[ " + i + " ] = ", childCtrl);
 			if (childCtrl === targetController) {
 				break;
 			}
@@ -424,8 +428,8 @@
 				rval += childCtrl.visibleElems[runID].elems.length;
 			}
 		}
-		/* console.log("rval = ", rval);
-		console.groupEnd(); */
+		console.log("rval = ", rval);
+		console.groupEnd();
 		return rval;
 	}
 	
