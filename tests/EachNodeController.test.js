@@ -259,4 +259,10 @@ test("2-dimensional foreach testing", function() {
 	}
 	
 	assertNodeListEquals(div.childNodes, expected);
+	
+	data().users(0)().showEmail(false);
+	same(div.childNodes.length, 22);
+	
+	data().users(1)().friends(0)().name("user2-friend1-mod");
+	same(div.childNodes[8].childNodes[0].childNodes[0].nodeValue, "user2-friend1-mod");
 });
