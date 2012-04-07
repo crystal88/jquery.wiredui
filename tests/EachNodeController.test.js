@@ -102,3 +102,161 @@ test("proper scope handling", function() {
 	
 	same(DOM[0].childNodes[4].nodeValue, "user2-mod");
 });
+
+
+test("2-dimensional foreach testing", function() {
+	var data = $.observable({
+		users: [{
+			name: "user1",
+			showEmail: true,
+			email: "user1@example.org",
+			friends: [
+				{name: "user1-friend1"},
+				{name: "user1-friend2"},
+				{name: "user1-friend3"}
+			]
+		}, {
+			name: "user2",
+			showEmail: false,
+			email: "user2@example.org",
+			friends: [
+				{name: "user2-friend1"},
+				{name: "user2-friend2"},
+			]
+		}, {
+			name: "user3",
+			showEmail: false,
+			email: "user3@example.org",
+			friends: [
+				{name: "user3-friend1"},
+				{name: "user3-friend2"},
+				{name: "user3-friend3"},
+				{name: "user3-friend4"},
+			]
+		}, {
+			name: "user4",
+			showEmail: true,
+			email: "user4@example.org",
+			friends: []
+		}, {
+			name: "user5",
+			showEmail: false,
+			email: "user5@example.org",
+			friends: [
+				{name: "user5-friend1"},
+				{name: "user5-friend2"}
+			]
+		}
+		]
+	});
+	
+	var ctrl = $.wiredui.buildController("<div><h1>Users: </h1>"
+	 + "{{each users as idx => user}}"
+		+ "name: ${user.name}"
+		+ "{{if user.showEmail}}<i>(${user.email})</i>{{/if}}"
+		+ "friends: <ul>"
+		+ "{{each user.friends as user}}"
+			+ "<li>${user.name}</li>"
+		+ "{{/each}}"
+		+ "</ul>"
+	 + "{{/each}}"
+	 + "</div>", data);
+	 
+	var div = ctrl.render()[0];
+	console.log(div);
+	
+	var expected = [
+		{nodeName: "H1", childNodes: [
+			"Users: "
+		]},
+		"name: ",
+		"user1",
+		{
+			nodeName: "I",
+			childNodes: [
+				"(", "user1@example.org", ")"
+			]
+		},
+		"friends: ",
+		{
+			nodeName: "UL",
+			childNodes: [
+				{nodeName: "LI", childNodes: ["user1-friend1"]},
+				{nodeName: "LI", childNodes: ["user1-friend2"]},
+				{nodeName: "LI", childNodes: ["user1-friend3"]}
+			]
+		},
+		"name: ",
+		"user2",
+		"friends: ",
+		{
+			nodeName: "UL",
+			childNodes: [
+				{nodeName: "LI", childNodes: ["user2-friend1"]},
+				{nodeName: "LI", childNodes: ["user2-friend2"]}
+			]
+		},
+		"name: ",
+		"user3",
+		"friends: ",
+		{
+			nodeName: "UL",
+			childNodes: [
+				{nodeName: "LI", childNodes: ["user3-friend1"]},
+				{nodeName: "LI", childNodes: ["user3-friend2"]},
+				{nodeName: "LI", childNodes: ["user3-friend3"]},
+				{nodeName: "LI", childNodes: ["user3-friend4"]}
+			]
+		},
+		"name: ",
+		"user4",
+		{
+			nodeName: "I",
+			childNodes: ["(", "user4@example.org", ")"]
+		},
+		"friends: ",
+		{
+			nodeName: "UL",
+			childNodes: []
+		},
+		"name: ",
+		"user5",
+		"friends: ",
+		{
+			nodeName: "UL",
+			childNodes: [
+				{nodeName: "LI", childNodes: ["user5-friend1"]},
+				{nodeName: "LI", childNodes: ["user5-friend2"]}
+			]
+		}
+	];
+	
+	var assertNodeListEquals = function(actual, expected) {
+		same(actual.length, expected.length);
+		for (var i = 0; i < actual.length; ++i) {
+			var actElem = actual[i];
+			var expElem = expected[i];
+			if (actElem === undefined || expElem === undefined) {
+				ok(false); break;
+			}
+			if (actElem.nodeName == "#text") {
+				same(actElem.nodeValue, expElem);
+			} else {
+				same(actElem.nodeName, expElem.nodeName);
+			}
+			
+			if (actElem.attributes) {
+				for (var j = 0; j < actElem.attributes.length; ++i) {
+					same(actElem.attributes[j].name, expElem.attributes[j].name);
+					same(actElem.attributes[j].value, expElem.attributes[j].value);
+				}
+			}
+			
+			if (actElem.childNodes && expElem.childNodes) {
+				assertNodeListEquals(actElem.childNodes, expElem.childNodes);
+			}
+		}
+	}
+	
+	assertNodeListEquals(div.childNodes, expected);
+});
