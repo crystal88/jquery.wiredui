@@ -325,8 +325,8 @@
 	 * @param integer idx
 	 */
 	var appendAtPosition = function appendAtPosition(parentElem, childElems, idx) {
-		console.group("appendAtPosition()");
-		console.log("params: ", debugElems(parentElem.childNodes), debugElems(childElems), idx);
+		//console.group("appendAtPosition()");
+		//console.log("params: ", debugElems(parentElem.childNodes), debugElems(childElems), idx);
 		var nodeStack = [];
 		while (idx < parentElem.childNodes.length) {
 			var remChild = parentElem.childNodes[idx];
@@ -345,8 +345,8 @@
 		for (j = 0; j < nodeStack.length; ++j) {
 			parentElem.appendChild(nodeStack[j]);
 		}
-		console.log("result: ", debugElems(parentElem.childNodes));
-		console.groupEnd();
+		//console.log("result: ", debugElems(parentElem.childNodes));
+		//console.groupEnd();
 	}
 	
 	NodeController.prototype.saveLoopVariables = function(runID) {
@@ -414,13 +414,13 @@
 	}
 	
 	NodeController.prototype.getIdxShiftFor = function(runID, parentElem, targetController) {
-		console.group("NodeController.getIdxShiftFor()");
+		/*console.group("NodeController.getIdxShiftFor()");
 		console.log("params: ", arguments);
-		console.log("this: ", this);
+		console.log("this: ", this);*/
 		var rval = targetController && targetController.position.idx || 0;
 		for (var i = 0; i < this.childNodeControllers.length; ++i) {
 			var childCtrl = this.childNodeControllers[i];
-			console.log("this.childNodeControllers[ " + i + " ] = ", childCtrl);
+			//console.log("this.childNodeControllers[ " + i + " ] = ", childCtrl);
 			if (childCtrl === targetController) {
 				break;
 			}
@@ -428,8 +428,8 @@
 				rval += childCtrl.visibleElems[runID].elems.length;
 			}
 		}
-		console.log("rval = ", rval);
-		console.groupEnd();
+		/*console.log("rval = ", rval);
+		console.groupEnd();*/
 		return rval;
 	}
 	
@@ -475,18 +475,18 @@
 			if (this.childNodeControllers[i].position.parentElem == childNodeCtrl.position.parentElem) {
 				idxShift += childNodeCtrl.visibleElems[runID].elems.length;
 				idxShift += this.childNodeControllers[i].visibleElems[runID].elems.length;
-				console.log("idxShift += " + this.childNodeControllers[i].visibleElems[runID].elems.length, this.childNodeControllers[i].nodeController, runID)
+				//console.log("idxShift += " + this.childNodeControllers[i].visibleElems[runID].elems.length, this.childNodeControllers[i].nodeController, runID)
 			}
 		}
 		var parentElem = childNodeCtrl.visibleElems[runID].parentElem;
 		if (null === parentElem) {
-			console.log(this, runID, this.getIdxShiftFor(runID, parentElem, childNodeCtrl), "parentController.partialUpdateChild()", childNodeCtrl.nodeController)
+			//console.log(this, runID, this.getIdxShiftFor(runID, parentElem, childNodeCtrl), "parentController.partialUpdateChild()", childNodeCtrl.nodeController)
 			this.parentController.partialUpdateChild(this
 				, this.runIDForParent(runID)
 				, this.getIdxShiftFor(runID, parentElem, childNodeCtrl)
 				, ctrlDOM);
 		} else {
-			console.log(parentElem.parentNode, ctrlDOM[0].nodeValue, this.getIdxShiftFor(runID, parentElem, childNodeCtrl));
+			//console.log(parentElem.parentNode, ctrlDOM[0].nodeValue, this.getIdxShiftFor(runID, parentElem, childNodeCtrl));
 			appendAtPosition(parentElem
 				, ctrlDOM
 				, this.getIdxShiftFor(runID, parentElem, childNodeCtrl));
@@ -510,14 +510,13 @@
 		}*/
 		
 		var parentElem = childNodeCtrl.visibleElems[runID].parentElem;
-		console.log("itt: ", this);
 		var idxShift = this.getIdxShiftFor(runID, parentElem, childNodeCtrl);
 		
-		console.log(insertIdx, idxShift, this, runID, childNodeCtrl, childNodeCtrl.visibleElems[runID]);
+		//console.log(insertIdx, idxShift, this, runID, childNodeCtrl, childNodeCtrl.visibleElems[runID]);
 		if (null === parentElem) {
-			console.log("parentController.partialUpdateChild(", this
+			/*console.log("parentController.partialUpdateChild(", this
 				, this.runIDForParent(runID)
-				, insertIdx + idxShift, newElems);
+				, insertIdx + idxShift, newElems);*/
 			this.parentController.partialUpdateChild(this
 				, this.runIDForParent(runID)
 				, insertIdx + idxShift
