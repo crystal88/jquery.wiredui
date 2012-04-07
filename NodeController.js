@@ -281,7 +281,7 @@
 				var attr = elem.attributes[i];
 				var newAttr = document.createAttribute(attr.name);
 				newAttr.value = attr.value;
-				rval.setAttribute(newAttr.name, newAttr);
+				rval.setAttribute(newAttr.name, newAttr.value);
 			}
 			return rval;
 		};
