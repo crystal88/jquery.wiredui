@@ -117,10 +117,6 @@
 		} else {
 			var newElem = elem.cloneNode();
 			
-			// cleaning the child nodes - it will be re-populated by subsequent startElem() calls
-			while (newElem.childNodes.length > 0) {
-				newElem.removeChild(newElem.childNodes[0]);
-			}
 			// console.log(debugStr + "  attaching to ", this.currentParent.nodeName || this.currentParent)
 			this.currentParent.appendChild(newElem);
 			
