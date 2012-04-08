@@ -117,6 +117,8 @@
 		} else {
 			var newElem = elem.cloneNode();
 			
+			this.createAttributeBindings(this.currentParent, newElem);
+			
 			// console.log(debugStr + "  attaching to ", this.currentParent.nodeName || this.currentParent)
 			this.currentParent.appendChild(newElem);
 			
@@ -124,6 +126,29 @@
 			this.currentParent = newElem;
 		}
 	};
+	
+	NodeController.prototype.createAttributeBindings = function(parentElem, elem) {
+		for (var i = 0; i < newElem.attributes.length; ++i) {
+			var attrName = newElem.attributes[i].nodeName;
+			var attrValue = newElem.attributes[i].nodeValue;
+			var parser = $.wiredui.TextElemParser(attrValue);
+			
+			var token = null;
+			while( (token = parser.read()) !== null ) {
+				switch(token.type) {
+					case 'html':
+					
+						break;
+					case 'output':
+					
+						break;
+					case 'stmt':
+					
+						break;
+				}
+			}
+		}
+	}
 	
 	NodeController.prototype.appendChild = function(child) {
 		this.childNodes.push(child);

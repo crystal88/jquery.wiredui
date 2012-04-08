@@ -289,7 +289,7 @@ test("Child-NodeController DOM positioning in plaintext env", function() {
 
 test("attribute binding", function() {
 	var data = $.observable({foo: "bar"});
-	var ctrl = $.wiredui.buildController('<div attrib="${foo}"></div>', data);
+	var ctrl = $.wiredui.buildController('<div attrib="${foo}" plainattr="text"></div>', data);
 	var div = ctrl.render()[0];
 	
 	same(div.getAttribute("attrib"), "bar");
