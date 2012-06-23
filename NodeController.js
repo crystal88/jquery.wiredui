@@ -14,6 +14,8 @@
 		
 		this.childNodeControllers = [];
 		
+		this.attributeControllers = [];
+		
 		this.listeners = [];
 		
 		this.readDepth = 0;
@@ -117,7 +119,7 @@
 		} else {
 			var newElem = elem.cloneNode();
 			
-			this.createAttributeBindings(this.currentParent, newElem);
+			this.createAttributeBindings(newElem);
 			
 			// console.log(debugStr + "  attaching to ", this.currentParent.nodeName || this.currentParent)
 			this.currentParent.appendChild(newElem);
@@ -127,17 +129,17 @@
 		}
 	};
 	
-	NodeController.prototype.createAttributeBindings = function(parentElem, elem) {
-		for (var i = 0; i < newElem.attributes.length; ++i) {
-			var attrName = newElem.attributes[i].nodeName;
-			var attrValue = newElem.attributes[i].nodeValue;
-			var parser = $.wiredui.TextElemParser(attrValue);
+	NodeController.prototype.createAttributeBindings = function(elem) {
+		for (var i = 0; i < elem.attributes.length; ++i) {
+			var attrName = elem.attributes[i].nodeName;
+			var attrValue = elem.attributes[i].nodeValue;
+			var parser = new $.wiredui.TextElemParser(attrValue);
 			
 			var token = null;
 			while( (token = parser.read()) !== null ) {
 				switch(token.type) {
 					case 'html':
-					
+						
 						break;
 					case 'output':
 					
