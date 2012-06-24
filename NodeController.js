@@ -36,15 +36,17 @@
 		this.dependencies = [];
 	}
 	
-	NodeController.prototype.setupListeners = function(deps, runID) {
+	NodeController.prototype.setupListeners = function(deps, runID, reRender) {
 		if (runID === undefined)
 			throw "missing runID - failed to set up event listeners";
 			
 		this.dependencies = deps;
 		var self = this;
-		var reRender = function() {
-			self.parentController.updateChild(self, runID);
-		};
+        if (undefined === reRender) {
+		    reRender = function() {
+			    self.parentController.updateChild(self, runID);
+		    };
+        }
 		for (var i = 0; i < deps.length; ++i) {
 			var depChain = deps[i];
 			
@@ -104,7 +106,7 @@
 			return;
 			
 		for (var i = 0; i < this.childNodeControllers.length; ++i) {
-			this.childNodeControllers[i].nodeController.removeListeners(runID);
+			this.childNodeControllers[i].nodeController.removeListeners(runID, true);
 		}
 	};
 	
@@ -134,7 +136,7 @@
 			var attrName = elem.attributes[i].nodeName;
 			var attrValue = elem.attributes[i].nodeValue;
 			var parser = new $.wiredui.TextElemParser(attrValue);
-			
+
 			var token = null;
 			while( (token = parser.read()) !== null ) {
 				switch(token.type) {
@@ -142,7 +144,16 @@
 						
 						break;
 					case 'output':
-					
+                        var nodeController = new $.wiredui.OutputNodeController(
+                            this.varCtx
+                            , this
+                            , token.token
+                        );
+                        var childAttrCtrl = {
+                            position: new $.wiredui.AttributePosition(elem, attrName),
+                            nodeController: nodeController
+                        };
+                        this.attributeControllers.push(childAttrCtrl);
 						break;
 					case 'stmt':
 					
