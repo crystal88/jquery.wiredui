@@ -438,15 +438,16 @@
 				this.childNodeControllers[i].visibleElems[runID].parentElem = null;
 			}
 		}
+
+        this.updateAttributes(runID);
+
 		return rval.childNodes;
 	}
-	
-	NodeController.prototype.getVisibleParentElem = function(runID) {
-		var rval = null;
-		
-		return rval;
-	}
-	
+
+    NodeController.prototype.updateAttributes = function(runID) {
+
+    }
+
 	NodeController.prototype.getIdxShiftFor = function(runID, parentElem, targetController) {
 		/*console.group("NodeController.getIdxShiftFor()");
 		console.log("params: ", arguments);
