@@ -295,7 +295,16 @@
 			throw "failed finishElem " + elem.nodeName + ": no opened elem";
 		
 		this.currentParent = this.parentStack.pop();
-	}
+	};
+
+    NodeController.prototype.setAttributeParentForRunID = function (runID, origParentElem, actualParentElem) {
+        for (var i in this.attributeControllers) {
+            var childAttrCtrl = this.attributeControllers[i];
+            if (childAttrCtrl.position.origParentElem == origParentElem) {
+                childAttrCtrl.position.parentElems[runID] = actualParentElem;
+            }
+        }
+    };
 	
 	NodeController.prototype.prepareRunID = function(runID) {
 		for (var i = 0; i < this.childNodeControllers.length; ++i) {
@@ -304,12 +313,16 @@
 				elems: []
 			};
 		}
+
+        var self = this;
 		
 		var swallowCopyElem = function(elem) {
 			if ( elem.nodeName == "#text" )
 				return document.createTextNode(elem.nodeValue);
 			
 			var rval = document.createElement(elem.nodeName);
+
+            self.setAttributeParentForRunID(runID, elem, rval);
 			
 			for (var i = 0; i < elem.attributes.length; ++i) {
 				var attr = elem.attributes[i];
@@ -464,17 +477,20 @@
                 var attrCtrl = attrControllers[origIdx];
 
                 var subList = attrCtrl.render(runID);
-                console.log(subList);
                 for (var j in subList) {
-                    var newElem = subList[j];
-                    if ( ! newElem instanceof String) {
-                        newElem = new String(newElem);
-                    }
-                    console.log(newElem);
-                    newAttrValue += newElem
+                    newAttrValue += subList[j].nodeValue;
                 }
 
                 processedAttrCtrlIndices[origIdx] = true;
+            }
+            console.log(this.attributeControllers[origIdx].position.parentElems);
+
+            var attrs = this.attributeControllers[origIdx].position.parentElems[runID].attributes;
+            for (var attrIdx = 0; attrIdx < attrs.length; ++attrIdx) {
+                if (attrs[attrIdx].name == this.attributeControllers[origIdx].position.attrName) {
+                    attrs[attrIdx].value = newAttrValue;
+                    break;
+                }
             }
 
         }
