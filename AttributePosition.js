@@ -1,8 +1,9 @@
 (function($) {
 	
 	var AttributePosition = $.wiredui.AttributePosition = function(elem, attrName) {
-		this.elem = elem;
+		this.origParentElem = elem;
 		this.attrName = attrName;
+        this.parentElems = {};
 	}
 	
 })(jQuery);

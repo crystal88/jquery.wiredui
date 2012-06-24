@@ -445,8 +445,62 @@
 	}
 
     NodeController.prototype.updateAttributes = function(runID) {
+        var processedAttrCtrlIndices = [];
 
-    }
+        for (var i = 0; i < this.attributeControllers.length; ++i) {
+            if (processedAttrCtrlIndices[i] === true)
+                continue;
+
+            var attrControllers = this.getAttributeControllersByPosition(
+                this.attributeControllers[i].position
+            );
+
+            var newAttrValue = '';
+
+            for (var origIdx in attrControllers) {
+                if (processedAttrCtrlIndices[origIdx] === true)
+                    throw "cannot re-render the same attribute controller twice (idx: " + origIdx + ")";
+
+                var attrCtrl = attrControllers[origIdx];
+
+                var subList = attrCtrl.render(runID);
+                console.log(subList);
+                for (var j in subList) {
+                    var newElem = subList[j];
+                    if ( ! newElem instanceof String) {
+                        newElem = new String(newElem);
+                    }
+                    console.log(newElem);
+                    newAttrValue += newElem
+                }
+
+                processedAttrCtrlIndices[origIdx] = true;
+            }
+
+        }
+    };
+
+    /**
+     * Queries the attribute controllers which belong to the DOM elem
+     * and its attribute marked by the position.
+     *
+     * In the return value the indices won't be sequential, instead they will
+     * be the index of the node controller in the this.attributeControllers array.
+     *
+     * @param position
+     * @return Array<$.wiredui.NodeController>
+     */
+    NodeController.prototype.getAttributeControllersByPosition = function(position) {
+        var rval = [];
+        for (var i = 0; i < this.attributeControllers.length; ++i) {
+            var attrCtrl = this.attributeControllers[i];
+            if (attrCtrl.position.attrName == position.attrName
+                && attrCtrl.position.origParentElem == position.origParentElem) {
+                rval[i] = attrCtrl.nodeController;
+            }
+        }
+        return rval;
+    };
 
 	NodeController.prototype.getIdxShiftFor = function(runID, parentElem, targetController) {
 		/*console.group("NodeController.getIdxShiftFor()");
@@ -466,7 +520,7 @@
 		/*console.log("rval = ", rval);
 		console.groupEnd();*/
 		return rval;
-	}
+	};
 	
 	NodeController.prototype.render = function() {
 		return this.renderBlock("0");
