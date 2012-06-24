@@ -138,10 +138,12 @@
 			var parser = new $.wiredui.TextElemParser(attrValue);
 
 			var token = null;
+            var lastHtmlFragment = null;
+            var outputPassed = false;
 			while( (token = parser.read()) !== null ) {
 				switch(token.type) {
 					case 'html':
-						
+						lastHtmlFragment = token.token;
 						break;
 					case 'output':
                         var nodeController = new $.wiredui.OutputNodeController(
@@ -149,17 +151,27 @@
                             , this
                             , token.token
                         );
+                        var attrPos = new $.wiredui.AttributePosition(elem, attrName);
+                        if (lastHtmlFragment !== null) {
+                            attrPos.htmlPrefix = lastHtmlFragment;
+                            lastHtmlFragment = null;
+                        }
                         var childAttrCtrl = {
-                            position: new $.wiredui.AttributePosition(elem, attrName),
+                            position: attrPos,
                             nodeController: nodeController
                         };
                         this.attributeControllers.push(childAttrCtrl);
+                        outputPassed = true;
 						break;
 					case 'stmt':
 					
 						break;
 				}
 			}
+            if (lastHtmlFragment !== null && outputPassed) {
+                this.attributeControllers[this.attributeControllers.length - 1]
+                    .position.htmlSuffix = lastHtmlFragment;
+            }
 		}
 	}
 	
@@ -475,19 +487,26 @@
                     throw "cannot re-render the same attribute controller twice (idx: " + origIdx + ")";
 
                 var attrCtrl = attrControllers[origIdx];
+                var attrPos = this.attributeControllers[origIdx].position;
 
                 var subList = attrCtrl.render(runID);
                 for (var j in subList) {
+                    if (attrPos.htmlPrefix !== null) {
+                        newAttrValue += attrPos.htmlPrefix;
+                    }
+
                     newAttrValue += subList[j].nodeValue;
+
+                    if (attrPos.htmlSuffix) {
+                        newAttrValue += attrPos.htmlSuffix;
+                    }
                 }
 
                 processedAttrCtrlIndices[origIdx] = true;
             }
-            console.log(this.attributeControllers[origIdx].position.parentElems);
-
-            var attrs = this.attributeControllers[origIdx].position.parentElems[runID].attributes;
+            var attrs = this.attributeControllers[i].position.parentElems[runID].attributes;
             for (var attrIdx = 0; attrIdx < attrs.length; ++attrIdx) {
-                if (attrs[attrIdx].name == this.attributeControllers[origIdx].position.attrName) {
+                if (attrs[attrIdx].name == this.attributeControllers[i].position.attrName) {
                     attrs[attrIdx].value = newAttrValue;
                     break;
                 }
