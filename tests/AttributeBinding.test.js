@@ -47,3 +47,15 @@ test("output controller within foreach", function() {
     same("val31 val32", div.childNodes[2].getAttribute("attr"));
 
 });
+
+test("output variable updating", function() {
+    var data = $.observable({
+        myvar: "val"
+    });
+    var ctrl = $.wiredui.buildController('<div attr="${myvar}"></div>', data);
+    var div = ctrl.render()[0];
+
+    same("val", div.getAttribute('attr'));
+    data().myvar('val-changed');
+    same("val-changed", div.getAttribute('attr'));
+});

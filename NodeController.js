@@ -469,7 +469,27 @@
 		return rval.childNodes;
 	}
 
-    NodeController.prototype.updateAttributes = function(runID) {
+    /**
+     * Updates the attribute values which contain node controllers.
+     *
+     * If childCtrl is undefined then it updates all attribute values
+     * containing node controllers, otherwise it only updates the
+     * attribute value which contains childCtrl. In the latter case
+     * every other node controller's value in the given attribute value
+     * is also re-evaluated.
+     *
+     * childCtrl is undefined when a given DOM subtree is rendered first time,
+     * and a NodeController instance when a node controller's dependent data
+     * changes therefore the node controller's value should be re-evaluated.
+     *
+     * In the first case updateAttributes() is called by NodeController.renderBlock()
+     *
+     * In the latter case updateAttributes() is called by NodeController.updateAttribute()
+     *
+     * @param runID
+     * @param childCtrl
+     */
+    NodeController.prototype.updateAttributes = function(runID, childCtrl) {
         var processedAttrCtrlIndices = [];
 
         for (var i = 0; i < this.attributeControllers.length; ++i) {
@@ -479,6 +499,18 @@
             var attrControllers = this.getAttributeControllersByPosition(
                 this.attributeControllers[i].position
             );
+
+            if (childCtrl !== undefined) {
+                var found = false;
+                for (var j = 0; j < attrControllers.length; ++j) {
+                    if (attrControllers[j] === childCtrl) {
+                        found = true;
+                        break;
+                    }
+                }
+                if ( ! found)
+                    break;
+            }
 
             var newAttrValue = '';
 
@@ -573,8 +605,18 @@
 	NodeController.prototype.updateChild = function(childCtrl, runID) {
 		if (undefined === runID)
 			throw "missing runID - failed updateChild()";
-		
-		var childNodeCtrl = this.getChildNodeByCtrl(childCtrl);
+
+		var childNodeCtrl = null;
+        try {
+            childNodeCtrl = this.getChildNodeByCtrl(childCtrl);
+        } catch (e) {
+            if (e === "childNodeController not found") {
+                this.updateAttributes(runID, childCtrl);
+                return;
+            }
+            throw e;
+        }
+
 		var elemTrash = document.createElement("div");
 		for (var i = 0; i < childNodeCtrl.visibleElems[runID].elems.length; ++i) {
 			elemTrash.appendChild( childNodeCtrl.visibleElems[runID].elems[i] );
