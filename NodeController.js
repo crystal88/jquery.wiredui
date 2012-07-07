@@ -119,8 +119,8 @@
 		if (elem.nodeName === "#text") {
 			this.readTextElem(elem.nodeValue);
 		} else {
-			var newElem = elem.cloneNode();
-			
+			var newElem = elem.cloneNode(false);
+
 			this.createAttributeBindings(newElem);
 			
 			// console.log(debugStr + "  attaching to ", this.currentParent.nodeName || this.currentParent)
