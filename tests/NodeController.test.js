@@ -7,13 +7,14 @@ test("OutputNode syntax tree", function() {
 	});
 	
 	same(1, ctrl.childNodes[0].childNodes[0].childNodes.length);
-	same("#text", ctrl.childNodes[0].childNodes[0].childNodes[0].nodeName);
-	same("txt", ctrl.childNodes[0].childNodes[0].childNodes[0].nodeValue);
+	same(ctrl.childNodes[0].childNodes[0].childNodes[0].nodeName, "#text");
+    console.log(ctrl);
+	same(ctrl.childNodes[0].childNodes[0].childNodes[0].nodeValue, "txt");
 	
-	same(1, ctrl.childNodeControllers.length);
+	same(ctrl.childNodeControllers.length, 1);
 	var childCtrl = ctrl.childNodeControllers[0].nodeController;
 	var pos = ctrl.childNodeControllers[0].position;
-	same(1, pos.idx);
+	same(pos.idx, 1);
 	same(ctrl.childNodes[0].childNodes[0], pos.parentElem);
 	same(childCtrl.parentController, ctrl);
 	
