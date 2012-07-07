@@ -60,7 +60,7 @@
 						if ( (next = this.nextChar()) === '{' ) {
 							return {
 								type: this.currentContext,
-								token: token
+								literal: token
 							};
 						}
 				}
@@ -68,7 +68,7 @@
 			}
 			return {
 				type: this.currentContext,
-				token: token
+				literal: token
 			};
 		}
 		for (; this.idx < this.inputStrLen; ++this.idx) { // reading stmt and output context
@@ -91,14 +91,14 @@
 						this.idx += 2;
 						return {
 							type: this.currentContext,
-							token: trim(token)
+							literal: trim(token)
 						};
 						
 					} else if ( this.currentContext == 'output' ) {
 						++this.idx;
 						return {
 							type: this.currentContext,
-							token: trim(token)
+							literal: trim(token)
 						};
 					}
 			}
@@ -122,11 +122,11 @@
 		var token = null;
 		while( (token = this.read()) !== null) {
 			if (token.type == "output") {
-				rval += "${" + token.token + "}";
+				rval += "${" + token.literal + "}";
 			} else if (token.type == "stmt") {
-				rval += "{{" + token.token + "}}";
+				rval += "{{" + token.literal + "}}";
 			} else {
-				rval += token.token;
+				rval += token.literal;
 			}
 		}
 		return rval;

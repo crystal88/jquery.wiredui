@@ -143,13 +143,13 @@
 			while( (token = parser.read()) !== null ) {
 				switch(token.type) {
 					case 'html':
-						lastHtmlFragment = token.token;
+						lastHtmlFragment = token.literal;
 						break;
 					case 'output':
                         var nodeController = new $.wiredui.OutputNodeController(
                             this.varCtx
                             , this
-                            , token.token
+                            , token.literal
                         );
                         var attrPos = new $.wiredui.AttributePosition(elem, attrName);
                         if (lastHtmlFragment !== null) {
@@ -165,7 +165,7 @@
 						break;
 					case 'stmt':
                         console.log("itt: ", token);
-                        var nodeController = this.createStatementController(token.token);
+                        var nodeController = this.createStatementController(token.literal);
                         var attrPos = new $.wiredui.AttributePosition(elem, attrName);
                         if (lastHtmlFragment !== null) {
                             attrPos.htmlPrefix = lastHtmlFragment;
@@ -220,18 +220,18 @@
 					childNodeCtrl.position = pos;
 					childNodeCtrl.nodeController = new $.wiredui.OutputNodeController(this.varCtx
 						, this
-						, token.token);
+						, token.literal);
 					this.childNodeControllers.push(childNodeCtrl);
 					break;
 				case "stmt":
-					var nodeController = this.createChildNodeController(token.token);
+					var nodeController = this.createChildNodeController(token.literal);
 					if (nodeController !== null) {
 						this.iterator.listener = nodeController;
 						this.iterator.pushTextNode(parser.getUnread());
 					}
 					break;
 				case "html":
-					this.currentParent.appendChild(document.createTextNode(token.token));
+					this.currentParent.appendChild(document.createTextNode(token.literal));
 					break;
 			}
 		}
