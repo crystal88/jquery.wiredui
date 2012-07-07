@@ -109,7 +109,7 @@
 	}
 	
 	TextElemParser.prototype.readAll = function() {
-		var rval = new Array();
+		var rval = [];
 		var token = null;
 		while ( (token = this.read()) !== null ) {
 			rval.push(token);
