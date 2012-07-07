@@ -59,3 +59,15 @@ test("output variable updating", function() {
     data().myvar('val-changed');
     same("val-changed", div.getAttribute('attr'));
 });
+
+test("IfNodeController in attribute", function() {
+   var data = $.observable({
+       condition: true
+   });
+   var ctrl = $.wiredui.buildController('<div attr="before{{if condition}}true{{else}}false{{/if}} after"></div>', data);
+    console.log(ctrl);
+    var div = ctrl.render();
+
+    console.log(div);
+
+});

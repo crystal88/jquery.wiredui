@@ -52,6 +52,7 @@
 			IfNodeController.lastCreatedIf = null;
 			
 			var unread = this.parser.getUnread();
+            console.log("pushing unread: " + unread, this.parentController);
 			this.iterator.pushTextNode(unread);
 			this.iterator.listener = this.parentController;
 			return this.parentController;

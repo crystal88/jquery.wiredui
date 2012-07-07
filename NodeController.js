@@ -139,7 +139,7 @@
 
 			var token = null;
             var lastHtmlFragment = null;
-            var outputPassed = false;
+            var controllerPassed = false;
 			while( (token = parser.read()) !== null ) {
 				switch(token.type) {
 					case 'html':
@@ -161,14 +161,28 @@
                             nodeController: nodeController
                         };
                         this.attributeControllers.push(childAttrCtrl);
-                        outputPassed = true;
+                        controllerPassed = true;
 						break;
 					case 'stmt':
-					
+                        console.log("itt: ", token);
+                        var nodeController = this.createStatementController(token.token);
+                        var attrPos = new $.wiredui.AttributePosition(elem, attrName);
+                        if (lastHtmlFragment !== null) {
+                            attrPos.htmlPrefix = lastHtmlFragment;
+                            lastHtmlFragment = null;
+                        }
+                        var childAttrCtrl = {
+                            position: attrPos,
+                            nodeController: nodeController
+                        };
+                        this.attributeControllers.push(childAttrCtrl);
+                        this.iterator.listener = nodeController;
+                        this.iterator.pushTextNode(parser.getUnread())
+                        controllerPassed = true;
 						break;
 				}
 			}
-            if (lastHtmlFragment !== null && outputPassed) {
+            if (lastHtmlFragment !== null && controllerPassed) {
                 this.attributeControllers[this.attributeControllers.length - 1]
                     .position.htmlSuffix = lastHtmlFragment;
             }
