@@ -584,10 +584,7 @@
     };
 
 	NodeController.prototype.getIdxShiftFor = function(runID, parentElem, targetController) {
-		/*console.group("NodeController.getIdxShiftFor()");
-		console.log("params: ", arguments);
-		console.log("this: ", this);*/
-		var rval = targetController && targetController.position.idx || 0;
+		var rval = targetController && targetController.position.idx || (undefined === targetController ? this.childNodes.length : 0);
 		for (var i = 0; i < this.childNodeControllers.length; ++i) {
 			var childCtrl = this.childNodeControllers[i];
 			//console.log("this.childNodeControllers[ " + i + " ] = ", childCtrl);
@@ -598,8 +595,6 @@
 				rval += childCtrl.visibleElems[runID].elems.length;
 			}
 		}
-		/*console.log("rval = ", rval);
-		console.groupEnd();*/
 		return rval;
 	};
 	
@@ -660,13 +655,11 @@
 		}
 		var parentElem = childNodeCtrl.visibleElems[runID].parentElem;
 		if (null === parentElem) {
-			//console.log(this, runID, this.getIdxShiftFor(runID, parentElem, childNodeCtrl), "parentController.partialUpdateChild()", childNodeCtrl.nodeController)
 			this.parentController.partialUpdateChild(this
 				, this.runIDForParent(runID)
 				, this.getIdxShiftFor(runID, parentElem, childNodeCtrl)
 				, ctrlDOM);
 		} else {
-			//console.log(parentElem.parentNode, ctrlDOM[0].nodeValue, this.getIdxShiftFor(runID, parentElem, childNodeCtrl));
 			appendAtPosition(parentElem
 				, ctrlDOM
 				, this.getIdxShiftFor(runID, parentElem, childNodeCtrl));
@@ -685,14 +678,8 @@
 	 */
 	NodeController.prototype.partialUpdateChild = function(childCtrl, runID, insertIdx, newElems) {
 		var childNodeCtrl = this.getChildNodeByCtrl(childCtrl);
-		/*if (childCtrl instanceof $.wiredui.EachNodeController) {
-			runID = ((tmpArr = runID.split(";")).pop(), tmpArr).join(";")
-		}*/
-		
 		var parentElem = childNodeCtrl.visibleElems[runID].parentElem;
 		var idxShift = this.getIdxShiftFor(runID, parentElem, childNodeCtrl);
-		
-		//console.log(insertIdx, idxShift, this, runID, childNodeCtrl, childNodeCtrl.visibleElems[runID]);
 		if (null === parentElem) {
 			/*console.log("parentController.partialUpdateChild(", this
 				, this.runIDForParent(runID)

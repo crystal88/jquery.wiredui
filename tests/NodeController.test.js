@@ -8,7 +8,7 @@ test("OutputNode syntax tree", function() {
 	
 	same(1, ctrl.childNodes[0].childNodes[0].childNodes.length);
 	same(ctrl.childNodes[0].childNodes[0].childNodes[0].nodeName, "#text");
-    console.log(ctrl);
+    // console.log(ctrl);
 	same(ctrl.childNodes[0].childNodes[0].childNodes[0].nodeValue, "txt");
 	
 	same(ctrl.childNodeControllers.length, 1);
@@ -267,11 +267,11 @@ test("Child-NodeController DOM positioning in plaintext env", function() {
 	
 	same(eachChild.nodeController.getIdxShiftFor("0;0", null, ifChild), 0);
 	
-	same(eachChild.nodeController.getIdxShiftFor("0;1", null, ifChild), 4);
+	same(eachChild.nodeController.getIdxShiftFor("0;1", null, ifChild), 5);
 	
-	console.log(div);
-	//console.log(ctrl);
-	return;
+	// console.log(div);
+	// console.log(ctrl);
+	//return;
 	data().users(3)().email("user4-mod@example.org");
 	
 	var expected = ["hello ", "main user", "all users:"
